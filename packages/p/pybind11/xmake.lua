@@ -11,7 +11,7 @@ package("pybind11")
 
     add_deps("cmake")
     add_deps("python 3.x", {system = false})
-    on_install(function (package)
+    on_install("macosx", "linux", "bsd", "windows|x86", "windows|x64", "msys", "mingw", "cygwin", function (package)
         local configs = {
             "-DPYBIND11_TEST=OFF"
         }
