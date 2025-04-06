@@ -73,7 +73,7 @@ package("llvm")
 
     on_fetch("fetch")
 
-    on_install("windows", "msys", "cygwin", "mingw", function (package)
+    on_install("windows|x64", "windows|x86", "msys", "cygwin", "mingw", function (package)
         os.cp("*", package:installdir())
     end)
 
