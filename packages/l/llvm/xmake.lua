@@ -171,9 +171,9 @@ package("llvm")
 
     on_test(function (package)
         if package:is_toolchain() and not package:is_cross() then
-            os.vrun("llvm-config --version")
+            os.vrun(package:installdir() .. "/bin/llvm-config --version")
             if package:config("clang") then
-                os.vrun("clang --version")
+                os.vrun(package:installdir() .. "/bin/clang --version")
             end
         elseif package:is_library() then
             if package:config("clang") then
