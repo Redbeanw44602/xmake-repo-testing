@@ -23,26 +23,19 @@ package("llvm")
     end
     add_configs("all", {description = "Build all projects.", default = false, type = "boolean"})
 
-    on_source(function (package)
-        if package:is_plat("windows") then
-            if package:is_arch("x86") then
-                package:set("urls", "https://github.com/xmake-mirror/llvm-windows/releases/download/$(version)/clang+llvm-$(version)-win32.zip")
-                package:add("versions", "16.0.6", "5e1f560f75e7a4c7a6509cf7d9a28b4543e7afcb4bcf4f747e9f208f0efa6818")
-                package:add("versions", "17.0.6", "ce78b510603cb3b347788d2f52978e971cf5f55559151ca13a73fd400ad80c41")
-                package:add("versions", "18.1.1", "9f59dd99d45f64a5c00b00d27da8fe8b5f162905026f5c9ef0ade6e73ae18df3")
-            else
-                package:set("urls", "https://github.com/xmake-mirror/llvm-windows/releases/download/$(version)/clang+llvm-$(version)-win64.zip")
-                package:add("versions", "16.0.6", "7adb1a630b6cc676a4b983aca9b01e67f770556c6e960e9ee9aa7752c8beb8a3")
-                package:add("versions", "17.0.6", "c480a4c280234b91f7796a1b73b18134ae62fe7c88d2d0c33312d33cb2999187")
-                package:add("versions", "18.1.1", "28a9fbcd18f1e7e736ece6d663726bc15649f025343c3004dcbfc2d367b9924c")
-            end
-        else
-            package:set("urls", "https://github.com/llvm/llvm-project/releases/download/llvmorg-$(version)/llvm-project-$(version).src.tar.xz")
-            package:add("versions", "16.0.6", "ce5e71081d17ce9e86d7cbcfa28c4b04b9300f8fb7e78422b1feb6bc52c3028e")
-            package:add("versions", "17.0.6", "58a8818c60e6627064f312dbf46c02d9949956558340938b71cf731ad8bc0813")
-            package:add("versions", "18.1.1", "8f34c6206be84b186b4b31f47e1b52758fa38348565953fad453d177ef34c0ad")
+    if is_plat("windows", "msys", "mingw", "cygwin") then
+        if is_arch("x64", "x86_64") then
+            add_urls("https://github.com/xmake-mirror/llvm-windows/releases/download/$(version)/clang+llvm-$(version)-win64.zip")
+            add_versions("19.1.7", "c6e058c6012f499811caa1ec037cc1b5c2fd2f8c20cc3315cae602cbd6c81a5e")
         end
-    end)
+        if is_arch("x86", "i386") then
+            add_urls("https://github.com/xmake-mirror/llvm-windows/releases/download/$(version)/clang+llvm-$(version)-win32.zip")
+            add_versions("19.1.7", "8fded42dfa7fede876057e3a857073a5df15649df62a6f1c352588f65569d940")
+        end
+    else
+        add_urls("https://github.com/llvm/llvm-project/releases/download/llvmorg-$(version)/llvm-project-$(version).src.tar.xz")
+        add_versions("19.1.7", "82401fea7b79d0078043f7598b835284d6650a75b93e64b6f761ea7b63097501")
+    end
 
     add_deps("cmake")
     on_load(function (package)
@@ -171,9 +164,13 @@ package("llvm")
 
     on_test(function (package)
         if package:is_toolchain() and not package:is_cross() then
-            os.vrun(package:installdir() .. "/bin/llvm-config --version")
+            local suffix = ""
+            if package:is_plat("windows", "msys", "cygwin", "mingw") then
+                suffix = ".exe"
+            end
+            os.vrun(package:installdir() .. ("/bin/llvm-config%s --version"):format(suffix))
             if package:config("clang") then
-                os.vrun(package:installdir() .. "/bin/clang --version")
+                os.vrun(package:installdir() .. ("/bin/clang%s --version"):format(suffix))
             end
         elseif package:is_library() then
             if package:config("clang") then
