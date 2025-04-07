@@ -136,7 +136,6 @@ package("libllvm")
         os.cd("llvm")
         import("package.tools.cmake").install(package, configs)
     end)
-    end
 
     on_component("flang", function (package, component)
         local constants = import('constants')()
