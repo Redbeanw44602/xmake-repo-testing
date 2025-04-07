@@ -3,7 +3,7 @@ package("libllvm")
     set_description("The LLVM Compiler Infrastructure.")
 
     -- The LLVM shared library cannot be built under windows.
-    add_configs("shared", {description = "Build shared library.", default = false, type = "boolean"})
+    add_configs("shared", {description = "Build shared library.", default = false, type = "boolean", readonly = is_plat("windows", "msys", "cygwin", "mingw")})
 
     add_configs("exception", {description = "Enable C++ exception support for LLVM.", default = true, type = "boolean"})
     add_configs("rtti",      {description = "Enable C++ RTTI support for LLVM.", default = true, type = "boolean"})
