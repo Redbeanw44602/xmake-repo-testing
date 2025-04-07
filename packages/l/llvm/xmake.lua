@@ -39,6 +39,8 @@ package("llvm")
 
     add_deps("cmake")
     on_load(function (package)
+        package:addenv("PATH", "bin")
+        
         -- add deps.
         if not package:is_plat("windows", "msys", "cygwin", "mingw") then
             package:add("deps", "python 3.x", {kind = "binary", host = true})
@@ -164,13 +166,9 @@ package("llvm")
 
     on_test(function (package)
         if package:is_toolchain() and not package:is_cross() then
-            local suffix = ""
-            if package:is_plat("windows", "msys", "cygwin", "mingw") then
-                suffix = ".exe"
-            end
-            os.vrun(package:installdir() .. ("/bin/llvm-config%s --version"):format(suffix))
+            os.vrun("llvm-config --version")
             if package:config("clang") then
-                os.vrun(package:installdir() .. ("/bin/clang%s --version"):format(suffix))
+                os.vrun("clang --version")
             end
         elseif package:is_library() then
             if package:config("clang") then
