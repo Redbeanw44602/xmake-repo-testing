@@ -47,4 +47,4 @@ jobs:
         run: |
           $Env:XMAKE_MAIN_REPO = "https://github.com/xmake-io/xmake-repo.git"
           xmake --version
-          xmake l ./scripts/test.lua -D -p android --ndk=D:/a/xmake-repo-testing/xmake-repo-testing/ndk/android-ndk-${{ matrix.ndk }} --ndk_sdkver=${{ matrix.ndk_sdkver }} -a ${{ matrix.arch }}
+          xmake l ./scripts/test.lua -vD -p android --ndk=D:/a/xmake-repo-testing/xmake-repo-testing/ndk/android-ndk-${{ matrix.ndk }} --ndk_sdkver=${{ matrix.ndk_sdkver }} -a ${{ matrix.arch }}
