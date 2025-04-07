@@ -1,5 +1,4 @@
-package("llvm")
-    set_kind("toolchain") -- also supports "kind = library" 
+package("libllvm")
     set_homepage("https://llvm.org/")
     set_description("The LLVM Compiler Infrastructure.")
 
@@ -95,6 +94,8 @@ package("llvm")
 
         local configs = {
             "-DCMAKE_BUILD_TYPE=Release",
+            "-DLLVM_BUILD_TOOLS=OFF",
+            "-DLLVM_INCLUDE_TOOLS=OFF"
             "-DLLVM_INCLUDE_BENCHMARKS=OFF",
             "-DLLVM_INCLUDE_EXAMPLES=OFF",
             "-DLLVM_INCLUDE_TESTS=OFF",
@@ -102,8 +103,6 @@ package("llvm")
             "-DLLVM_ENABLE_PROJECTS=" .. table.concat(projects_enabled, ";")
         }
         table.insert(configs, "-DLLVM_BUILD_LLVM_DYLIB=" .. (package:config("shared") and "ON" or "OFF"))
-        table.insert(configs, "-DLLVM_BUILD_TOOLS="  .. (package:is_toolchain() and "ON" or "OFF"))
-        table.insert(configs, "-DLLVM_INCLUDE_TOOLS=" .. (package:is_toolchain() and "ON" or "OFF"))
         table.insert(configs, "-DLLVM_ENABLE_EH=" .. (package:config("exception") and "ON" or "OFF"))
         table.insert(configs, "-DLLVM_ENABLE_RTTI=" .. (package:config("rtti") and "ON" or "OFF"))
         table.insert(configs, "-DLLVM_ENABLE_DIA_SDK=" .. (package:config("ms_dia") and "ON" or "OFF"))
@@ -137,6 +136,7 @@ package("llvm")
         os.cd("llvm")
         import("package.tools.cmake").install(package, configs)
     end)
+    end
 
     on_component("flang", function (package, component)
         local constants = import('constants')()
@@ -165,38 +165,28 @@ package("llvm")
     end)
 
     on_test(function (package)
-        if package:is_toolchain() and not package:is_cross() then
-            -- windows pre-builds may not include llvm-config
-            if not package:is_plat("windows", "msys", "cygwin", "mingw") then
-                os.vrun("llvm-config --version")
-            end
-            if package:config("clang") then
-                os.vrun("clang --version")
-            end
-        elseif package:is_library() then
-            if package:config("clang") then
-                assert(package:check_cxxsnippets({test = [[
-                    #include <clang/Frontend/CompilerInstance.h>
-                    void test() {
-                        clang::CompilerInstance instance;
-                    }
-                ]]}, {configs = {languages = 'c++17'}}))
-            end
-            if package:config("mlir") then
-                assert(package:check_cxxsnippets({test = [[
-                    #include <mlir/IR/MLIRContext.h>
-                    void test() {
-                        mlir::MLIRContext context;
-                    }   
-                ]]}, {configs = {languages = 'c++17'}}))
-            end
+        assert(package:check_cxxsnippets({test = [[
+            #include <llvm/IR/LLVMContext.h>
+            #include <llvm/IR/Module.h>
+            void test() {
+                llvm::LLVMContext context;
+                llvm::Module module("test", context);
+            }
+        ]]}, {configs = {languages = 'c++17'}}))
+        if package:config("clang") then
             assert(package:check_cxxsnippets({test = [[
-                #include <llvm/IR/LLVMContext.h>
-                #include <llvm/IR/Module.h>
+                #include <clang/Frontend/CompilerInstance.h>
                 void test() {
-                    llvm::LLVMContext context;
-                    llvm::Module module("test", context);
+                    clang::CompilerInstance instance;
                 }
+            ]]}, {configs = {languages = 'c++17'}}))
+        end
+        if package:config("mlir") then
+            assert(package:check_cxxsnippets({test = [[
+                #include <mlir/IR/MLIRContext.h>
+                void test() {
+                    mlir::MLIRContext context;
+                }   
             ]]}, {configs = {languages = 'c++17'}}))
         end
     end)
