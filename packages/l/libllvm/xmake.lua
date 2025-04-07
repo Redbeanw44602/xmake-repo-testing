@@ -95,7 +95,7 @@ package("libllvm")
         local configs = {
             "-DCMAKE_BUILD_TYPE=Release",
             "-DLLVM_BUILD_TOOLS=OFF",
-            "-DLLVM_INCLUDE_TOOLS=OFF",
+            --"-DLLVM_INCLUDE_TOOLS=OFF",
             "-DLLVM_INCLUDE_BENCHMARKS=OFF",
             "-DLLVM_INCLUDE_EXAMPLES=OFF",
             "-DLLVM_INCLUDE_TESTS=OFF",
