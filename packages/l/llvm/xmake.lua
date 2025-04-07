@@ -4,7 +4,7 @@ package("llvm")
     set_description("The LLVM Compiler Infrastructure.")
 
     -- The LLVM shared library cannot be built under windows.
-    add_configs("shared", {description = "Build shared library.", default = false, type = "boolean", readonly = is_plat("windows")})
+    add_configs("shared", {description = "Build shared library.", default = false, type = "boolean"})
 
     add_configs("exception", {description = "Enable C++ exception support for LLVM.", default = true, type = "boolean"})
     add_configs("rtti",      {description = "Enable C++ RTTI support for LLVM.", default = true, type = "boolean"})
@@ -166,7 +166,10 @@ package("llvm")
 
     on_test(function (package)
         if package:is_toolchain() and not package:is_cross() then
-            os.vrun("llvm-config --version")
+            -- windows pre-builds may not include llvm-config
+            if not package:is_plat("windows", "msys", "cygwin", "mingw") then
+                os.vrun("llvm-config --version")
+            end
             if package:config("clang") then
                 os.vrun("clang --version")
             end
