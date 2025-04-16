@@ -3,26 +3,24 @@ package("libllvm")
     set_description("The LLVM Compiler Infrastructure.")
 
     -- The LLVM shared library cannot be built under windows.
-    add_configs("shared", {description = "Build shared library.", default = false, type = "boolean", readonly = is_plat("windows", "msys", "cygwin", "mingw")})
+    add_configs("shared", {description = "Build shared library.", default = false, type = "boolean", readonly = is_plat("windows")})
 
     add_configs("exception", {description = "Enable C++ exception support for LLVM.", default = true, type = "boolean"})
     add_configs("rtti",      {description = "Enable C++ RTTI support for LLVM.", default = true, type = "boolean"})
-    add_configs("lto",       {description = "Enable link-time optimizations for LLVM builds.", default = "on", type = "string", values = {"on", "off", "thin", "full"}})
+    -- add_configs("lto",       {description = "Enable link-time optimizations for LLVM builds.", default = "on", type = "string", values = {"on", "off", "thin", "full"}}) RMME
 
     add_configs("ms_dia",  {description = "Enable DIA SDK to support non-native PDB parsing. (msvc only)", default = true, type = "boolean"})
     add_configs("libffi",  {description = "Enable libffi to support the LLVM interpreter to call external functions.", default = false, type = "boolean"})
     add_configs("httplib", {description = "Enable cpp-httplib to support llvm-debuginfod serve debug information over HTTP.", default = false, type = "boolean"})
     add_configs("libcxx",  {description = "Use libc++ as C++ standard library instead of libstdc++, ", default = false, type = "boolean"})
-    add_configs("zlib",    {description = "Indicates whether to use zlib, by default it is only used if available.", default = nil, type = "boolean"})
-    add_configs("zstd",    {description = "Indicates whether to use zstd, by default it is only used if available.", default = nil, type = "boolean"})
 
     includes(path.join(os.scriptdir(), "constants.lua"))
-    for _, project in ipairs(constants.get_llvm_known_projects()) do
-        add_configs(project, {description = "Build " .. project .. " project.", default = (project == "clang"), type = "boolean"})
+    for _, project in ipairs(get_llvm_known_projects()) do
+        add_configs(project:gsub("-", "_"), {description = "Build " .. project .. " project.", default = (project == "clang"), type = "boolean"})
     end
     add_configs("all", {description = "Build all projects.", default = false, type = "boolean"})
 
-    if is_plat("windows", "msys", "mingw", "cygwin") then
+    if is_plat("windows") then
         if is_arch("x64", "x86_64") then
             add_urls("https://github.com/xmake-mirror/llvm-windows/releases/download/$(version)/clang+llvm-$(version)-win64.zip")
             add_versions("19.1.7", "c6e058c6012f499811caa1ec037cc1b5c2fd2f8c20cc3315cae602cbd6c81a5e")
@@ -36,12 +34,16 @@ package("libllvm")
         add_versions("19.1.7", "82401fea7b79d0078043f7598b835284d6650a75b93e64b6f761ea7b63097501")
     end
 
-    add_deps("cmake")
+    add_deps("cmake", "ninja")
+    add_deps("zlib", "zstd", {system = true, optional = true})
+    --set_policy("package.cmake_generator.ninja", true) -- RMME
+
     on_load(function (package)
+        local constants = import('constants')
         package:addenv("PATH", "bin")
         
         -- add deps.
-        if not package:is_plat("windows", "msys", "cygwin", "mingw") then
+        if not package:is_plat("windows") then
             package:add("deps", "python 3.x", {kind = "binary", host = true})
             if package:config("libffi") then
                 package:add("deps", "libffi")
@@ -52,63 +54,75 @@ package("libllvm")
             if package:config("libcxx") then
                 package:add("deps", "libc++")
             end
-            if package:config("zlib") then
-                package:add("deps", "zlib")
-            end
-            if package:config("zstd") then
-                package:add("deps", "zstd")
-            end
         end
 
-        -- add components
-        if package:is_library() then
-            local components = {"flang", "clang", "mlir", "libunwind"}
-            for _, name in ipairs(components) do
-                if package:config(name) or package:config("all") then
-                    package:add("components", name, {deps = "base"})
-                end
+        -- needed for gold and strip RMME
+        if package:is_plat("linux") then
+            package:add("deps", "binutils", {host = true})
+        end
+
+        -- add links
+        local linkable_projects = {"mlir", "flang", "lldb", "lld", "clang", "polly", "bolt"}
+        table.insert(linkable_projects, "llvm") -- make sure that the base library is last.
+        for _, name in ipairs(linkable_projects) do
+            local cname = name:gsub("-", "_")
+            local ptype = package:config("shared") and "shared" or "static"
+            if cname == "llvm" or package:config(cname) or package:config("all") then
+                package:add("links", constants[("get_%s_%s_libraries"):format(cname, ptype)]())
             end
-            package:add("components", "base", {default = true})
         end
     end)
 
     on_fetch("fetch")
 
-    on_install("windows|x64", "windows|x86", "msys", "cygwin", "mingw", function (package)
+    on_install("windows|x64", "windows|x86", function (package)
         os.cp("*", package:installdir())
     end)
 
     on_install("linux", "macosx", "bsd", "android", "iphoneos", "wasm", function (package)
-        local constants = import('constants')()
-        
+        local constants = import('constants')
+
         local projects_enabled = {}
         if package:config("all") then
             table.insert(projects_enabled, "all")
         else
             for _, project in ipairs(constants.get_llvm_known_projects()) do
-                if package:config(project) then
+                if package:config(project:gsub("-", "_")) then
                     table.insert(projects_enabled, project)
                 end
             end
         end
 
         local configs = {
+            -- common cmake
             "-DCMAKE_BUILD_TYPE=Release",
-            "-DLLVM_BUILD_TOOLS=OFF",
-            --"-DLLVM_INCLUDE_TOOLS=OFF",
-            "-DLLVM_INCLUDE_BENCHMARKS=OFF",
+
+            -- llvm
+            "-DLLVM_BUILD_UTILS=OFF",
+            "-DLLVM_PARALLEL_LINK_JOBS=2", -- RMME
+            "-DLLVM_USE_LINKER=gold",
+            "-DLLVM_INCLUDE_DOCS=OFF",
             "-DLLVM_INCLUDE_EXAMPLES=OFF",
             "-DLLVM_INCLUDE_TESTS=OFF",
+            "-DLLVM_INCLUDE_BENCHMARKS=OFF",
             "-DLLVM_OPTIMIZED_TABLEGEN=ON",
-            "-DLLVM_ENABLE_PROJECTS=" .. table.concat(projects_enabled, ";")
+            "-DLLVM_ENABLE_PROJECTS=" .. table.concat(projects_enabled, ";"),
+
+            -- disable tools build - to save link time
+            "-DLLVM_BUILD_TOOLS=OFF",
+            "-DCLANG_BUILD_TOOLS=OFF",
+            "-DBOLT_BUILD_TOOLS=OFF",
+            "-DFLANG_BUILD_TOOLS=OFF",
+            "-DLLD_BUILD_TOOLS=OFF"
         }
         table.insert(configs, "-DLLVM_BUILD_LLVM_DYLIB=" .. (package:config("shared") and "ON" or "OFF"))
         table.insert(configs, "-DLLVM_ENABLE_EH=" .. (package:config("exception") and "ON" or "OFF"))
         table.insert(configs, "-DLLVM_ENABLE_RTTI=" .. (package:config("rtti") and "ON" or "OFF"))
         table.insert(configs, "-DLLVM_ENABLE_DIA_SDK=" .. (package:config("ms_dia") and "ON" or "OFF"))
-        table.insert(configs, "-DLLVM_ENABLE_LIBPFM=" .. (package:config("use_libpfm") and "ON" or "OFF"))
         table.insert(configs, "-DLLVM_ENABLE_LIBCXX=" .. (package:config("libcxx") and "ON" or "OFF"))
-        table.insert(configs, "-DLLVM_ENABLE_LTO=" .. package:config("lto"))
+        -- table.insert(configs, "-DLLVM_ENABLE_LTO=" .. package:config("lto")) RMME
+        table.insert(configs, "-DLLVM_ENABLE_ZSTD=" .. (package:dep("zstd") and "ON" or "OFF"))
+        table.insert(configs, "-DLLVM_ENABLE_ZLIB=" .. (package:dep("zlib") and "ON" or "OFF"))
         if package:config("libffi") then
             table.insert(configs, "-DLLVM_ENABLE_FFI=ON")
             table.insert(configs, "-DFFI_INCLUDE_DIR=" .. package:dep("libffi"):installdir("include"))
@@ -122,45 +136,9 @@ package("libllvm")
         else
             table.insert(configs, "-DLLVM_ENABLE_HTTPLIB=OFF")
         end
-        if package:config("zlib") == nil then
-            table.insert(configs, "-DLLVM_ENABLE_ZLIB=ON")
-        else
-            table.insert(configs, "-DLLVM_ENABLE_ZLIB=" .. (package:config("zlib") and "FORCE_ON" or "OFF"))
-        end
-        if package:config("zstd") == nil then
-            table.insert(configs, "-DLLVM_ENABLE_ZSTD=ON")
-        else
-            table.insert(configs, "-DLLVM_ENABLE_ZSTD=" .. (package:config("zstd") and "FORCE_ON" or "OFF"))
-        end
 
         os.cd("llvm")
         import("package.tools.cmake").install(package, configs)
-    end)
-
-    on_component("flang", function (package, component)
-        local constants = import('constants')()
-        component:add("links", package:config("shared") and constants.get_flang_shared_libraries() or constants.get_flang_static_libraries())
-    end)
-
-    on_component("clang", function (package, component)
-        local constants = import('constants')()
-        component:add("links", package:config("shared") and constants.get_clang_shared_libraries() or constants.get_clang_static_libraries())
-    end)
-
-    on_component("mlir", function (package, component)
-        local constants = import('constants')()
-        component:add("links", package:config("shared") and constants.get_llvm_shared_libraries() or constants.get_llvm_static_libraries())
-    end)
-
-    on_component("libunwind", function (package, component)
-        component:add("links", {
-            "unwind"
-        })
-    end)
-
-    on_component("base", function (package, component)
-        local constants = import('constants')()
-        component:add("links", package:config("shared") and constants.get_llvm_shared_libraries() or constants.get_llvm_static_libraries())
     end)
 
     on_test(function (package)
@@ -178,14 +156,6 @@ package("libllvm")
                 void test() {
                     clang::CompilerInstance instance;
                 }
-            ]]}, {configs = {languages = 'c++17'}}))
-        end
-        if package:config("mlir") then
-            assert(package:check_cxxsnippets({test = [[
-                #include <mlir/IR/MLIRContext.h>
-                void test() {
-                    mlir::MLIRContext context;
-                }   
             ]]}, {configs = {languages = 'c++17'}}))
         end
     end)
