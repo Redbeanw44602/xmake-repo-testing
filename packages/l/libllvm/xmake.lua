@@ -3,7 +3,7 @@ package("libllvm")
     set_description("The LLVM Compiler Infrastructure.")
 
     -- The LLVM shared library cannot be built under windows.
-    add_configs("shared", {description = "Build shared library.", default = false, type = "boolean", readonly = is_plat("windows")})
+    add_configs("shared", {description = "Build shared library.", default = false, type = "boolean", readonly = is_plat("windows", "msys", "mingw", "cygwin")})
 
     add_configs("exception", {description = "Enable C++ exception support for LLVM.", default = true, type = "boolean"})
     add_configs("rtti",      {description = "Enable C++ RTTI support for LLVM.", default = true, type = "boolean"})
@@ -21,6 +21,7 @@ package("libllvm")
     add_configs("all", {description = "Build all projects.", default = false, type = "boolean"})
 
     if is_plat("windows", "msys", "mingw", "cygwin") then
+        add_configs("vs_runtime", {description = "Set vs compiler runtime.", default = "MT", readonly = true})
         if is_arch("x64", "x86_64") then
             add_urls("https://github.com/xmake-mirror/llvm-windows/releases/download/$(version)/clang+llvm-$(version)-win64.zip")
             add_versions("19.1.7", "c6e058c6012f499811caa1ec037cc1b5c2fd2f8c20cc3315cae602cbd6c81a5e")
