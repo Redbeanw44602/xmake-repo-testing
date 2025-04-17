@@ -7,7 +7,6 @@ package("libllvm")
 
     add_configs("exception", {description = "Enable C++ exception support for LLVM.", default = true, type = "boolean"})
     add_configs("rtti",      {description = "Enable C++ RTTI support for LLVM.", default = true, type = "boolean"})
-    add_configs("lto",       {description = "Enable link-time optimizations for LLVM builds.", default = "on", type = "string", values = {"on", "off", "thin", "full"}})
 
     add_configs("ms_dia",  {description = "Enable DIA SDK to support non-native PDB parsing. (msvc only)", default = true, type = "boolean"})
     add_configs("libffi",  {description = "Enable libffi to support the LLVM interpreter to call external functions.", default = false, type = "boolean"})
@@ -115,7 +114,7 @@ package("libllvm")
         table.insert(configs, "-DLLVM_ENABLE_RTTI=" .. (package:config("rtti") and "ON" or "OFF"))
         table.insert(configs, "-DLLVM_ENABLE_DIA_SDK=" .. (package:config("ms_dia") and "ON" or "OFF"))
         table.insert(configs, "-DLLVM_ENABLE_LIBCXX=" .. (package:config("libcxx") and "ON" or "OFF"))
-        table.insert(configs, "-DLLVM_ENABLE_LTO=" .. package:config("lto"))
+        table.insert(configs, "-DLLVM_ENABLE_LTO=" .. (package:config("lto") and "ON" or "OFF"))
         table.insert(configs, "-DLLVM_ENABLE_ZSTD=" .. (package:dep("zstd") and "ON" or "OFF"))
         table.insert(configs, "-DLLVM_ENABLE_ZLIB=" .. (package:dep("zlib") and "ON" or "OFF"))
         if package:config("libffi") then
