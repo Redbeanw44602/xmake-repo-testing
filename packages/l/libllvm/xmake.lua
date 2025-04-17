@@ -20,7 +20,7 @@ package("libllvm")
     end
     add_configs("all", {description = "Build all projects.", default = false, type = "boolean"})
 
-    if is_plat("windows") then
+    if is_plat("windows", "msys", "mingw", "cygwin") then
         if is_arch("x64", "x86_64") then
             add_urls("https://github.com/xmake-mirror/llvm-windows/releases/download/$(version)/clang+llvm-$(version)-win64.zip")
             add_versions("19.1.7", "c6e058c6012f499811caa1ec037cc1b5c2fd2f8c20cc3315cae602cbd6c81a5e")
@@ -34,16 +34,16 @@ package("libllvm")
         add_versions("19.1.7", "82401fea7b79d0078043f7598b835284d6650a75b93e64b6f761ea7b63097501")
     end
 
-    add_deps("cmake", "ninja")
+    add_deps("cmake", "ninja", {host = true})
     add_deps("zlib", "zstd", {system = true, optional = true})
-    --set_policy("package.cmake_generator.ninja", true) -- RMME
+    set_policy("package.cmake_generator.ninja", true)
 
     on_load(function (package)
         local constants = import('constants')
         package:addenv("PATH", "bin")
         
         -- add deps.
-        if not package:is_plat("windows") then
+        if not package:is_plat("windows", "msys", "mingw", "cygwin") then -- prebuilt
             package:add("deps", "python 3.x", {kind = "binary", host = true})
             if package:config("libffi") then
                 package:add("deps", "libffi")
@@ -54,11 +54,6 @@ package("libllvm")
             if package:config("libcxx") then
                 package:add("deps", "libc++")
             end
-        end
-
-        -- needed for gold and strip RMME
-        if package:is_plat("linux") then
-            package:add("deps", "binutils", {host = true})
         end
 
         -- add links
@@ -75,11 +70,11 @@ package("libllvm")
 
     on_fetch("fetch")
 
-    on_install("windows|x64", "windows|x86", function (package)
+    on_install("windows|x64", "windows|x86", "msys", "mingw", "cygwin", function (package)
         os.cp("*", package:installdir())
     end)
 
-    on_install("linux", "macosx", "bsd", "android", "iphoneos", "wasm", function (package)
+    on_install("linux", "macosx", "bsd", "android", "iphoneos", "wasm", "cross", function (package)
         local constants = import('constants')
 
         local projects_enabled = {}
@@ -99,8 +94,6 @@ package("libllvm")
 
             -- llvm
             "-DLLVM_BUILD_UTILS=OFF",
-            "-DLLVM_PARALLEL_LINK_JOBS=2", -- RMME
-            "-DLLVM_USE_LINKER=gold",
             "-DLLVM_INCLUDE_DOCS=OFF",
             "-DLLVM_INCLUDE_EXAMPLES=OFF",
             "-DLLVM_INCLUDE_TESTS=OFF",
