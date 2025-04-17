@@ -3,11 +3,11 @@ package("libllvm")
     set_description("The LLVM Compiler Infrastructure.")
 
     -- The LLVM shared library cannot be built under windows.
-    add_configs("shared", {description = "Build shared library.", default = false, type = "boolean", readonly = is_plat("windows", "msys", "mingw", "cygwin")})
+    add_configs("shared", {description = "Build shared library.", default = false, type = "boolean", readonly = is_plat("windows")})
 
     add_configs("exception", {description = "Enable C++ exception support for LLVM.", default = true, type = "boolean"})
     add_configs("rtti",      {description = "Enable C++ RTTI support for LLVM.", default = true, type = "boolean"})
-    -- add_configs("lto",       {description = "Enable link-time optimizations for LLVM builds.", default = "on", type = "string", values = {"on", "off", "thin", "full"}}) RMME
+    add_configs("lto",       {description = "Enable link-time optimizations for LLVM builds.", default = "on", type = "string", values = {"on", "off", "thin", "full"}})
 
     add_configs("ms_dia",  {description = "Enable DIA SDK to support non-native PDB parsing. (msvc only)", default = true, type = "boolean"})
     add_configs("libffi",  {description = "Enable libffi to support the LLVM interpreter to call external functions.", default = false, type = "boolean"})
@@ -20,16 +20,14 @@ package("libllvm")
     end
     add_configs("all", {description = "Build all projects.", default = false, type = "boolean"})
 
-    if is_plat("windows", "msys", "mingw", "cygwin") then
+    if is_plat("windows") then
+        add_configs("runtimes",   {description = "Set vs compiler runtime.", default = "MT", readonly = true})
         add_configs("vs_runtime", {description = "Set vs compiler runtime.", default = "MT", readonly = true})
-        if is_arch("x64", "x86_64") then
+        if is_arch("x64") then
             add_urls("https://github.com/xmake-mirror/llvm-windows/releases/download/$(version)/clang+llvm-$(version)-win64.zip")
             add_versions("19.1.7", "c6e058c6012f499811caa1ec037cc1b5c2fd2f8c20cc3315cae602cbd6c81a5e")
         end
-        if is_arch("x86", "i386") then
-            add_urls("https://github.com/xmake-mirror/llvm-windows/releases/download/$(version)/clang+llvm-$(version)-win32.zip")
-            add_versions("19.1.7", "8fded42dfa7fede876057e3a857073a5df15649df62a6f1c352588f65569d940")
-        end
+        add_syslinks("psapi", "shell32", "ole32", "uuid", "advapi32", "ws2_32", "ntdll", "libxml2s")
     else
         add_urls("https://github.com/llvm/llvm-project/releases/download/llvmorg-$(version)/llvm-project-$(version).src.tar.xz")
         add_versions("19.1.7", "82401fea7b79d0078043f7598b835284d6650a75b93e64b6f761ea7b63097501")
@@ -44,7 +42,7 @@ package("libllvm")
         package:addenv("PATH", "bin")
         
         -- add deps.
-        if not package:is_plat("windows", "msys", "mingw", "cygwin") then -- prebuilt
+        if not package:is_plat("windows") then -- prebuilt
             package:add("deps", "python 3.x", {kind = "binary", host = true})
             if package:config("libffi") then
                 package:add("deps", "libffi")
@@ -67,11 +65,14 @@ package("libllvm")
                 package:add("links", constants[("get_%s_%s_libraries"):format(cname, ptype)]())
             end
         end
+        if package:is_plat("windows") then
+            package:add("links", "LLVM-C")
+        end
     end)
 
     on_fetch("fetch")
 
-    on_install("windows|x64", "windows|x86", "msys", "mingw", "cygwin", function (package)
+    on_install("windows|x64", function (package)
         os.cp("*", package:installdir())
     end)
 
@@ -114,7 +115,7 @@ package("libllvm")
         table.insert(configs, "-DLLVM_ENABLE_RTTI=" .. (package:config("rtti") and "ON" or "OFF"))
         table.insert(configs, "-DLLVM_ENABLE_DIA_SDK=" .. (package:config("ms_dia") and "ON" or "OFF"))
         table.insert(configs, "-DLLVM_ENABLE_LIBCXX=" .. (package:config("libcxx") and "ON" or "OFF"))
-        -- table.insert(configs, "-DLLVM_ENABLE_LTO=" .. package:config("lto")) RMME
+        table.insert(configs, "-DLLVM_ENABLE_LTO=" .. package:config("lto"))
         table.insert(configs, "-DLLVM_ENABLE_ZSTD=" .. (package:dep("zstd") and "ON" or "OFF"))
         table.insert(configs, "-DLLVM_ENABLE_ZLIB=" .. (package:dep("zlib") and "ON" or "OFF"))
         if package:config("libffi") then
@@ -130,6 +131,51 @@ package("libllvm")
         else
             table.insert(configs, "-DLLVM_ENABLE_HTTPLIB=OFF")
         end
+
+        if package:is_plat("android") then
+            local triple
+            if package:is_arch("arm64-v8a") then
+                triple = "aarch64-linux-android"
+            elseif package:arch():startswith("arm") then
+                triple = "armv7a-linux-androideabi"
+            elseif package:is_arch("x86") then
+                triple = "i686-linux-android"
+            elseif package:is_arch("x86_64") then
+                triple = "x86_64-linux-android"
+            else
+                raise("unsupported arch(%s) for android!", package:arch())
+            end
+            table.insert(configs, "-DLLVM_HOST_TRIPLE=" .. triple)
+        end
+        if package:is_plat("iphoneos") then
+            local triple
+            if package:is_arch("arm64") then
+                triple = "aarch64-apple-ios"
+            else
+                raise("unsupported arch(%s) for iphoneos!", package:arch())
+            end
+            table.insert(configs, "-DLLVM_HOST_TRIPLE=" .. triple)
+        end
+
+        function tryadd_dep(depname, varname)
+            varname = varname or depname
+            local dep = package:dep(depname)
+            if dep and not dep:is_system() then
+                local fetchinfo = dep:fetch({external = false})
+                if fetchinfo then
+                    local includedirs = fetchinfo.includedirs or fetchinfo.sysincludedirs
+                    if includedirs and #includedirs > 0 then
+                        table.insert(configs, "-D" .. varname .. "_INCLUDE_DIR=" .. table.concat(includedirs, " "))
+                    end
+                    local libfiles = fetchinfo.libfiles
+                    if libfiles then
+                        table.insert(configs, "-D" .. varname .. "_LIBRARY=" .. table.concat(libfiles, " "))
+                    end
+                end
+            end
+        end
+        tryadd_dep("zlib", "ZLIB")
+        tryadd_dep("zstd")
 
         os.cd("llvm")
         import("package.tools.cmake").install(package, configs)
