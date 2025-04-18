@@ -19,6 +19,8 @@ package("libllvm")
     end
     add_configs("all", {description = "Build all projects.", default = false, type = "boolean"})
 
+    add_patches("*", "patches/fix-darwin-detection.patch", "1eb82e34fe7abfd8374d3a69ca1a52fedddafc56c664a9e7ca2ae395b8720abf")
+
     if is_plat("windows") then
         add_configs("runtimes",   {description = "Set vs compiler runtime.", default = "MT", readonly = true})
         add_configs("vs_runtime", {description = "Set vs compiler runtime.", default = "MT", readonly = true})
@@ -163,11 +165,11 @@ package("libllvm")
                 if fetchinfo then
                     local includedirs = fetchinfo.includedirs or fetchinfo.sysincludedirs
                     if includedirs and #includedirs > 0 then
-                        table.insert(configs, "-D" .. varname .. "_INCLUDE_DIR=" .. table.concat(includedirs, " "))
+                        table.insert(configs, "-D" .. varname .. "_INCLUDE_DIR=" .. table.concat(includedirs, " "):gsub("\\", "/"))
                     end
                     local libfiles = fetchinfo.libfiles
                     if libfiles then
-                        table.insert(configs, "-D" .. varname .. "_LIBRARY=" .. table.concat(libfiles, " "))
+                        table.insert(configs, "-D" .. varname .. "_LIBRARY=" .. table.concat(libfiles, " "):gsub("\\", "/"))
                     end
                 end
             end

@@ -1,0 +1,25 @@
+From 0a716f8db7f234e4d35ff63f75680895aee702cd Mon Sep 17 00:00:00 2001
+From: Redbeanw44602 <redbeana44945@gmail.com>
+Date: Fri, 18 Apr 2025 13:13:21 +0800
+Subject: [PATCH] fix darwin detection
+
+---
+ llvm/cmake/modules/AddLLVM.cmake | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/llvm/cmake/modules/AddLLVM.cmake b/llvm/cmake/modules/AddLLVM.cmake
+index 39f0e28a249d..2f9f1bbefb69 100644
+--- a/llvm/cmake/modules/AddLLVM.cmake
++++ b/llvm/cmake/modules/AddLLVM.cmake
+@@ -320,7 +320,7 @@ function(add_link_opts target_name)
+   # linker in a context where the optimizations are not important.
+   if (NOT uppercase_CMAKE_BUILD_TYPE STREQUAL "DEBUG")
+     if(NOT LLVM_NO_DEAD_STRIP)
+-      if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
++      if(APPLE)
+         # ld64's implementation of -dead_strip breaks tools that use plugins.
+         set_property(TARGET ${target_name} APPEND_STRING PROPERTY
+                      LINK_FLAGS " -Wl,-dead_strip")
+-- 
+2.49.0
+
