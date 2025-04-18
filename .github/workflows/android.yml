@@ -30,8 +30,10 @@ jobs:
           remove-codeql: true
           remove-docker-images: true
 
-      - uses: actions/checkout@v2
-
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          
       - run: |
           pwd
           ls -a
