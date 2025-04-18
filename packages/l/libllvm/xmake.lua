@@ -33,8 +33,7 @@ package("libllvm")
         -- self-built
         add_urls("https://github.com/llvm/llvm-project/releases/download/llvmorg-$(version)/llvm-project-$(version).src.tar.xz")
         add_versions("19.1.7", "82401fea7b79d0078043f7598b835284d6650a75b93e64b6f761ea7b63097501")
-        
-        add_patches("*", "patches/fix-darwin-detection.patch", "1eb82e34fe7abfd8374d3a69ca1a52fedddafc56c664a9e7ca2ae395b8720abf")
+
         add_deps("zlib", "zstd", {optional = true})
     end
 
@@ -69,6 +68,9 @@ package("libllvm")
         end
         if package:is_plat("windows") then
             package:add("links", "LLVM-C")
+        end
+        if package:is_plat("android") then
+            package:add("links", "compiler_rt-extras") -- (armeabi-v7a, r22, 30) undefined symbol: __mulodi4
         end
     end)
 
@@ -155,6 +157,9 @@ package("libllvm")
                 raise("unsupported arch(%s) for iphoneos!", package:arch())
             end
             table.insert(configs, "-DLLVM_HOST_TRIPLE=" .. triple)
+
+            -- LLVM build systems mostly use "Darwin", not if(APPLE)
+            table.insert(configs, "-DCMAKE_SYSTEM_NAME=Darwin")
         end
 
         function tryadd_dep(depname, varname)
