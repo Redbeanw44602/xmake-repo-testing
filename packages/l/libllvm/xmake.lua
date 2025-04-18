@@ -19,24 +19,26 @@ package("libllvm")
     end
     add_configs("all", {description = "Build all projects.", default = false, type = "boolean"})
 
-    add_patches("*", "patches/fix-darwin-detection.patch", "1eb82e34fe7abfd8374d3a69ca1a52fedddafc56c664a9e7ca2ae395b8720abf")
-
     if is_plat("windows") then
-        add_configs("runtimes",   {description = "Set vs compiler runtime.", default = "MT", readonly = true})
-        add_configs("vs_runtime", {description = "Set vs compiler runtime.", default = "MT", readonly = true})
+        -- pre-built
         if is_arch("x64") then
             add_urls("https://github.com/xmake-mirror/llvm-windows/releases/download/$(version)/clang+llvm-$(version)-win64.zip")
             add_versions("19.1.7", "c6e058c6012f499811caa1ec037cc1b5c2fd2f8c20cc3315cae602cbd6c81a5e")
         end
+
+        add_configs("runtimes",   {description = "Set vs compiler runtime.", default = "MT", readonly = true})
+        add_configs("vs_runtime", {description = "Set vs compiler runtime.", default = "MT", readonly = true})
         add_syslinks("psapi", "shell32", "ole32", "uuid", "advapi32", "ws2_32", "ntdll", "version")
     else
+        -- self-built
         add_urls("https://github.com/llvm/llvm-project/releases/download/llvmorg-$(version)/llvm-project-$(version).src.tar.xz")
         add_versions("19.1.7", "82401fea7b79d0078043f7598b835284d6650a75b93e64b6f761ea7b63097501")
+        
+        add_patches("*", "patches/fix-darwin-detection.patch", "1eb82e34fe7abfd8374d3a69ca1a52fedddafc56c664a9e7ca2ae395b8720abf")
+        add_deps("zlib", "zstd", {optional = true})
     end
 
-    add_deps("cmake", {host = true})
-    add_deps("zlib", "zstd", {optional = true})
-
+    add_deps("cmake")
     on_load(function (package)
         local constants = import('constants')
         package:addenv("PATH", "bin")
