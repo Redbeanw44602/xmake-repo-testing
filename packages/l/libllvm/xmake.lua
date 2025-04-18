@@ -69,9 +69,6 @@ package("libllvm")
         if package:is_plat("windows") then
             package:add("links", "LLVM-C")
         end
-        if package:is_plat("android") then
-            package:add("links", "compiler_rt-extras") -- (armeabi-v7a, r22, 30) undefined symbol: __mulodi4
-        end
     end)
 
     on_install("windows|x64", function (package)
@@ -93,7 +90,7 @@ package("libllvm")
         end
 
         local configs = {
-            -- common cmake 
+            -- common cmake
             "-DCMAKE_BUILD_TYPE=Release",
 
             -- llvm
