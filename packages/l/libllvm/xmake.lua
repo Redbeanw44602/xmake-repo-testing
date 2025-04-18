@@ -92,7 +92,7 @@ package("libllvm")
             end
         end
 
-        local configs = {
+        local configs = { 
             -- common cmake
             "-DCMAKE_BUILD_TYPE=Release",
 
