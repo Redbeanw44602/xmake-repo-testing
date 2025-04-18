@@ -39,7 +39,7 @@ jobs:
 
       - run: |
           pwd
-          ls  
+          ls -a
 
       - name: Prepare
         run: |
