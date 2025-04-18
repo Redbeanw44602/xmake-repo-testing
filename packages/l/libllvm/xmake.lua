@@ -70,8 +70,6 @@ package("libllvm")
         end
     end)
 
-    on_fetch("fetch")
-
     on_install("windows|x64", function (package)
         os.cp("*", package:installdir())
     end)
