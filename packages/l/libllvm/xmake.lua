@@ -32,9 +32,8 @@ package("libllvm")
         add_versions("19.1.7", "82401fea7b79d0078043f7598b835284d6650a75b93e64b6f761ea7b63097501")
     end
 
-    add_deps("cmake", "ninja", {host = true})
-    add_deps("zlib", "zstd", {system = true, optional = true})
-    set_policy("package.cmake_generator.ninja", true)
+    add_deps("cmake", {host = true})
+    add_deps("zlib", "zstd", {optional = true})
 
     on_load(function (package)
         local constants = import('constants')
@@ -55,7 +54,7 @@ package("libllvm")
         end
 
         -- add links
-        local linkable_projects = {"mlir", "flang", "lldb", "lld", "clang", "polly", "bolt"}
+        local linkable_projects = {"lldb", "lld", "clang", "polly", "bolt"}
         table.insert(linkable_projects, "llvm") -- make sure that the base library is last.
         for _, name in ipairs(linkable_projects) do
             local cname = name:gsub("-", "_")
@@ -75,7 +74,7 @@ package("libllvm")
         os.cp("*", package:installdir())
     end)
 
-    on_install("linux", "macosx", "bsd", "android", "iphoneos", "wasm", "cross", function (package)
+    on_install("linux", "macosx", "bsd", "android", "iphoneos", "cross", function (package)
         local constants = import('constants')
 
         local projects_enabled = {}

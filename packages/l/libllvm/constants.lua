@@ -4,7 +4,7 @@ function get_llvm_all_projects()
     return {
         "bolt",
         "clang",
-        "clang-tools-extra", -- TODO: installation failed.
+        -- "clang-tools-extra", 
         "compiler-rt",       -- TODO: incompleted.
         "libc",              -- TODO: build failed.
         "libclc",            -- TODO: incompleted.
@@ -357,24 +357,4 @@ function get_lldb_static_libraries()
     return {
         "lldb" -- shared
     }
-end
-
---- from cmake/flang/FlangConfig.cmake
-
-function get_flang_shared_libraries()
-    return {} -- TODO
-end
-
-function get_flang_static_libraries()
-    return {} -- TODO
-end
-
---- from cmake/mlir/MLIRTargets.cmake
-
-function get_mlir_shared_libraries()
-    return {} -- TODO
-end
-
-function get_mlir_static_libraries()
-    return {} -- TODO
 end
