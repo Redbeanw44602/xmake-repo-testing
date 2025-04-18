@@ -21,26 +21,27 @@ jobs:
       group: ${{ github.ref }}-${{ github.base_ref }}-${{ github.head_ref }}-Android-${{ matrix.arch }}-${{ matrix.ndk }}-${{ matrix.ndk_sdkver }}
       cancel-in-progress: true
     steps:
-      - name: Maximize build space
-        uses: easimon/maximize-build-space@master
-        with:
-          remove-dotnet: true
-          remove-android: true
-          remove-haskell: true
-          remove-codeql: true
-          remove-docker-images: true
+    #  - name: Maximize build space
+    #    uses: easimon/maximize-build-space@master
+    #    with:
+    #      remove-dotnet: true
+    #      remove-android: true
+    #      remove-haskell: true
+    #      remove-codeql: true
+    #      remove-docker-images: true
 
       - uses: actions/checkout@v4
-      - uses: xmake-io/github-action-setup-xmake@v1
-        with:
-          xmake-version: branch@master
-          actions-cache-folder: ".xmake-cache"
-          actions-cache-key: "android"
 
       - run: |
           pwd
           ls -a
           git log
+        
+      - uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: branch@master
+          actions-cache-folder: ".xmake-cache"
+          actions-cache-key: "android"
 
       - name: Prepare
         run: |
