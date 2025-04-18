@@ -15,7 +15,7 @@ package("libllvm")
 
     includes(path.join(os.scriptdir(), "constants.lua"))
     for _, project in ipairs(get_llvm_known_projects()) do
-        add_configs(project:gsub("-", "_"), {description = "Build " .. project .. " project.", default = (project == "clang"), type = "boolean"})
+        add_configs(project:gsub("-", "_"), {description = "Build " .. project .. " project.", default = (project == "clang" or project == "compiler-rt"), type = "boolean"})
     end
     add_configs("all", {description = "Build all projects.", default = false, type = "boolean"})
 
@@ -98,6 +98,7 @@ package("libllvm")
 
             -- llvm
             "-DLLVM_BUILD_UTILS=OFF",
+            "-DLLVM_BUILD_EXTERNAL_COMPILER_RT=ON",
             "-DLLVM_INCLUDE_DOCS=OFF",
             "-DLLVM_INCLUDE_EXAMPLES=OFF",
             "-DLLVM_INCLUDE_TESTS=OFF",

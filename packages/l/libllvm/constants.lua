@@ -5,9 +5,9 @@ function get_llvm_all_projects()
         "bolt",
         "clang",
         -- "clang-tools-extra", 
-        "compiler-rt",       -- TODO: incompleted.
+        "compiler-rt",
         "libc",              -- TODO: build failed.
-        "libclc",            -- TODO: incompleted.
+        "libclc",
         "lld",
         "lldb",
         "mlir",              -- TODO: incompleted.
