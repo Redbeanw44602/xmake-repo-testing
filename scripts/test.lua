@@ -263,7 +263,7 @@ end
 
 function get_modified_packages()
     local packages = {}
-    local diff = os.iorun("git --no-pager diff HEAD~1")
+    local diff = os.iorun("git --no-pager diff HEAD^")
     for _, line in ipairs(diff:split("\n")) do
         if line:startswith("+++ b/") then
             local file = line:sub(7)
