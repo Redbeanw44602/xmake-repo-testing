@@ -30,16 +30,16 @@ jobs:
           remove-codeql: true
           remove-docker-images: true
 
-      - run: |
-          pwd
-          ls
-
       - uses: actions/checkout@v4
       - uses: xmake-io/github-action-setup-xmake@v1
         with:
           xmake-version: branch@master
           actions-cache-folder: ".xmake-cache"
           actions-cache-key: "android"
+
+      - run: |
+          pwd
+          ls  
 
       - name: Prepare
         run: |
