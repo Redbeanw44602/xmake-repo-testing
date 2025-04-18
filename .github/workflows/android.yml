@@ -40,6 +40,7 @@ jobs:
       - run: |
           pwd
           ls -a
+          git log
 
       - name: Prepare
         run: |
