@@ -1,4 +1,5 @@
 package("libllvm")
+    set_kind("library")
     set_homepage("https://llvm.org/")
     set_description("The LLVM Compiler Infrastructure.")
 
@@ -15,9 +16,11 @@ package("libllvm")
 
     includes(path.join(os.scriptdir(), "constants.lua"))
     for _, project in ipairs(get_llvm_known_projects()) do
-        add_configs(project:gsub("-", "_"), {description = "Build " .. project .. " project.", default = (project == "clang" or project == "compiler-rt"), type = "boolean"})
+        add_configs(project:gsub("-", "_"), {description = "Build " .. project .. " project.", default = (project == "clang"), type = "boolean"})
     end
-    add_configs("all", {description = "Build all projects.", default = false, type = "boolean"})
+    for _, runtime in ipairs(get_llvm_all_runtimes()) do
+        add_configs(runtime:gsub("-", "_"), {description = "Build " .. runtime .. " runtime.", default = (runtime == "compiler-rt"), type = "boolean"})
+    end
 
     if is_plat("windows") then
         -- pre-built
@@ -34,7 +37,9 @@ package("libllvm")
         add_urls("https://github.com/llvm/llvm-project/releases/download/llvmorg-$(version)/llvm-project-$(version).src.tar.xz")
         add_versions("19.1.7", "82401fea7b79d0078043f7598b835284d6650a75b93e64b6f761ea7b63097501")
 
+        add_deps("ninja")
         add_deps("zlib", "zstd", {optional = true})
+        set_policy("package.cmake_generator.ninja", true)
     end
 
     add_deps("cmake")
@@ -43,7 +48,7 @@ package("libllvm")
         package:addenv("PATH", "bin")
         
         -- add deps.
-        if not package:is_plat("windows") then -- prebuilt
+        if not package:is_plat("windows") then -- not prebuilt
             package:add("deps", "python 3.x", {kind = "binary", host = true})
             if package:config("libffi") then
                 package:add("deps", "libffi")
@@ -62,7 +67,7 @@ package("libllvm")
         for _, name in ipairs(linkable_projects) do
             local cname = name:gsub("-", "_")
             local ptype = package:config("shared") and "shared" or "static"
-            if cname == "llvm" or package:config(cname) or package:config("all") then
+            if cname == "llvm" or package:config(cname) then
                 package:add("links", constants[("get_%s_%s_libraries"):format(cname, ptype)]())
             end
         end
@@ -79,13 +84,15 @@ package("libllvm")
         local constants = import('constants')
 
         local projects_enabled = {}
-        if package:config("all") then
-            table.insert(projects_enabled, "all")
-        else
-            for _, project in ipairs(constants.get_llvm_known_projects()) do
-                if package:config(project:gsub("-", "_")) then
-                    table.insert(projects_enabled, project)
-                end
+        local runtimes_enabled = {}
+        for _, project in ipairs(constants.get_llvm_known_projects()) do
+            if package:config(project:gsub("-", "_")) then
+                table.insert(projects_enabled, project)
+            end
+        end
+        for _, runtime in ipairs(constants.get_llvm_all_runtimes()) do
+            if package:config(runtime:gsub("-", "_")) then
+                table.insert(runtimes_enabled, runtime)
             end
         end
 
@@ -102,6 +109,7 @@ package("libllvm")
             "-DLLVM_INCLUDE_BENCHMARKS=OFF",
             "-DLLVM_OPTIMIZED_TABLEGEN=ON",
             "-DLLVM_ENABLE_PROJECTS=" .. table.concat(projects_enabled, ";"),
+            "-DLLVM_ENABLE_RUNTIMES=" .. table.concat(runtimes_enabled, ";"),
 
             -- disable tools build - to save link time
             "-DLLVM_BUILD_TOOLS=OFF",

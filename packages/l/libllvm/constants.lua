@@ -1,19 +1,19 @@
 --- from llvm/CMakeLists.txt
 
 function get_llvm_all_projects()
+    -- @see https://llvm.org/docs/CMake.html
+    -- Some projects listed here can also go in LLVM_ENABLE_RUNTIMES. They should
+    -- only appear in one of the two lists. If a project is a valid possiblity for
+    -- both, prefer putting it in LLVM_ENABLE_RUNTIMES.
     return {
         "bolt",
         "clang",
-        -- "clang-tools-extra", 
-        "compiler-rt",
-        "libc",              -- TODO: build failed.
+        "clang-tools-extra",    -- But we do not build clang tools.
         "libclc",
         "lld",
         "lldb",
-        "mlir",              -- TODO: incompleted.
-        "openmp",
-        "polly",
-        "pstl"
+        "mlir",                 -- TODO: incompleted.
+        "polly"
     }
 end
 
@@ -25,6 +25,21 @@ end
 
 function get_llvm_known_projects()
     return table.join(get_llvm_all_projects(), get_llvm_extra_projects())
+end
+
+function get_llvm_all_runtimes()
+    return {
+        "libc",
+        "libunwind",
+        "libcxxabi",
+        "pstl",
+        "libcxx",
+        "compiler-rt",
+        "openmp",
+        "llvm-libgcc",
+        "offload",
+        "flang-rt"
+    }
 end
 
 --- from cmake/llvm/LLVMExports.cmake
