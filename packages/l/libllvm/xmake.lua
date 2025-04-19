@@ -19,7 +19,7 @@ package("libllvm")
         add_configs(project:gsub("-", "_"), {description = "Build " .. project .. " project.", default = (project == "clang"), type = "boolean"})
     end
     for _, runtime in ipairs(get_llvm_all_runtimes()) do
-        add_configs(runtime:gsub("-", "_"), {description = "Build " .. runtime .. " runtime.", default = (runtime == "compiler-rt"), type = "boolean"})
+        add_configs(runtime:gsub("-", "_"), {description = "Build " .. runtime .. " runtime.", default = false, type = "boolean"})
     end
 
     if is_plat("windows") then
@@ -74,6 +74,11 @@ package("libllvm")
         if package:is_plat("windows") then
             package:add("links", "LLVM-C")
         end
+
+        -- workaround to fix "error: undefined symbol: __mulodi4"
+        if package:is_plat("android") and package:arch():startswith("armeabi") and is_host("windows") then
+            package:add("links", "compiler_rt-extras", "clang_rt.builtins-arm-android")
+        end
     end)
 
     on_install("windows|x64", function (package)
@@ -102,7 +107,6 @@ package("libllvm")
 
             -- llvm
             "-DLLVM_BUILD_UTILS=OFF",
-            "-DLLVM_BUILD_EXTERNAL_COMPILER_RT=ON",
             "-DLLVM_INCLUDE_DOCS=OFF",
             "-DLLVM_INCLUDE_EXAMPLES=OFF",
             "-DLLVM_INCLUDE_TESTS=OFF",
@@ -144,7 +148,7 @@ package("libllvm")
             local triple
             if package:is_arch("arm64-v8a") then
                 triple = "aarch64-linux-android"
-            elseif package:arch():startswith("arm") then
+            elseif package:arch():startswith("armeabi") then
                 triple = "armv7a-linux-androideabi"
             elseif package:is_arch("x86") then
                 triple = "i686-linux-android"
