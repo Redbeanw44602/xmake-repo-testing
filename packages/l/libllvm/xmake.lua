@@ -42,6 +42,16 @@ package("libllvm")
         set_policy("package.cmake_generator.ninja", true)
     end
 
+    -- workaround to fix "error: undefined symbol: __mulodi4" (armeabi-v7a, r22, windows)
+    if is_plat("android") then
+        add_syslinks("compiler_rt-extras")
+    end
+
+    -- error: undefined symbol: backtrace
+    if is_plat("bsd") then
+        add_syslinks("execinfo")
+    end
+
     add_deps("cmake")
     on_load(function (package)
         local constants = import('constants')
@@ -75,16 +85,6 @@ package("libllvm")
             package:add("links", "LLVM-C")
         end
 
-        -- workaround to fix "error: undefined symbol: __mulodi4"
-        print("==============")
-        print("DEBUG - 1")
-        print("==============")
-        if package:is_plat("android") and package:arch():startswith("armeabi") and is_host("windows") then
-        print("==============")
-        print("DEBUG - 2")
-        print("==============")
-            package:add("links", "compiler_rt-extras", "clang_rt.builtins-arm-android")
-        end
     end)
 
     on_install("windows|x64", function (package)
