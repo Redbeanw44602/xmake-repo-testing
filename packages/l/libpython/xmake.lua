@@ -146,8 +146,6 @@ package("libpython")
         package:addenv("PATH", "Scripts")
     end)
 
-    on_fetch("fetch")
-
     on_install("windows|x86", "windows|x64", "msys", "mingw", "cygwin", function (package)
         if package:version():ge("3.0") then
             os.cp("python.exe", path.join(package:installdir("bin"), "python3.exe"))
