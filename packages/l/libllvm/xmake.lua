@@ -76,7 +76,13 @@ package("libllvm")
         end
 
         -- workaround to fix "error: undefined symbol: __mulodi4"
+        print("==============")
+        print("DEBUG - 1")
+        print("==============")
         if package:is_plat("android") and package:arch():startswith("armeabi") and is_host("windows") then
+        print("==============")
+        print("DEBUG - 2")
+        print("==============")
             package:add("links", "compiler_rt-extras", "clang_rt.builtins-arm-android")
         end
     end)
