@@ -20,13 +20,15 @@ jobs:
         cancel-in-progress: true
     steps:
       - uses: actions/checkout@v1
+      - run: |
+          free -h
 
       - name: Tests
         uses: vmactions/freebsd-vm@v1
         with:
           usesh: true
           sync: sshfs
-          mem: 4096
+          mem: 12288
           copyback: false
           prepare: pkg install -y git curl unzip gmake llvm gsed bash perl5 openssl
           run: |
@@ -38,6 +40,6 @@ jobs:
             gmake install
             export XMAKE_ROOT=y
             cd -
-            xmake l ./scripts/test.lua -D -k ${{ matrix.kind }} -vD
+            xmake l ./scripts/test.lua -vD -k ${{ matrix.kind }} -vD
 
 
