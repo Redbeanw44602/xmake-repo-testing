@@ -28,7 +28,7 @@ jobs:
         with:
           usesh: true
           sync: sshfs
-          mem: 4096
+          mem: 12288
           copyback: false
           prepare: pkg install -y git curl unzip gmake llvm gsed bash perl5 openssl
           run: |
