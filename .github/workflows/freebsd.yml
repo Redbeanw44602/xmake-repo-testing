@@ -20,8 +20,6 @@ jobs:
         cancel-in-progress: true
     steps:
       - uses: actions/checkout@v1
-      - run: |
-          free -h
 
       - name: Tests
         uses: vmactions/freebsd-vm@v1
