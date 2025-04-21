@@ -75,17 +75,20 @@ package("libpython")
         end
         if not package:is_plat("android", "iphoneos", "wasm") then
             package:add("deps", "ncurses")  -- py module 'curses'
-            package:add("deps", "readline") -- py module 'readline'
             package:add("deps", "libedit")  -- py module 'readline'
+            -- missing dependencies for bsd
+            if not package:is_plat("bsd") then
+                package:add("deps", "readline") -- py module 'readline'
+            end
         end
 
-        -- missing dependencies for android
-        if not is_plat("android") then
+        -- missing dependencies for android, wasm
+        if not is_plat("android", "wasm") then
             package:add("deps", "libffi") -- py module 'ctypes', TODO: android
         end
 
-        -- missing dependencies for bsd, android, iphoneos
-        if not package:is_plat("bsd", "android", "iphoneos") then
+        -- missing dependencies for bsd, android, iphoneos, wasm
+        if not package:is_plat("bsd", "android", "iphoneos", "wasm") then
             package:add("deps", "mpdecimal")
             package:add("deps", "lzma")
         end
@@ -114,11 +117,7 @@ package("libpython")
     end)
 
     on_install("windows|x86", "windows|x64", "msys", "mingw", "cygwin", function (package)
-        if package:version():ge("3.0") then
-            os.cp("python.exe", path.join(package:installdir("bin"), "python3.exe"))
-        else
-            os.cp("python.exe", path.join(package:installdir("bin"), "python2.exe"))
-        end
+        os.cp("python.exe", path.join(package:installdir("bin"), "python3.exe"))
         os.cp("*.exe", package:installdir("bin"))
         os.cp("*.dll", package:installdir("bin"))
         os.cp("Lib", package:installdir())
@@ -129,7 +128,6 @@ package("libpython")
     --- android, iphoneos, wasm unsupported: dependencies not resolved.
     on_install("macosx", "linux", "bsd", "android", "iphoneos", "wasm", function (package)
         local constants = import("constants")
-
         function opt2cfg(cfg)
             if type(cfg) == "boolean" then
                 return cfg and 'yes' or 'no'
@@ -154,6 +152,15 @@ package("libpython")
             if package:config(feature) ~= nil then
                 table.insert(configs, ("--with-%s=%s"):format(pkg:gsub("_", "-"), opt2cfg(package:config(feature))))
             end
+        end
+
+        if package:is_cross() then
+            import("detect.tools.find_python3")
+            table.insert(configs, "--build=" .. os.iorun("./config.guess"))
+            table.insert(configs, "--with-build-python=" .. find_python3())
+        end
+        if not package:dep("readline") then
+            table.insert(configs, "--without-readline")
         end
 
         -- add openssl libs path
@@ -250,13 +257,11 @@ package("libpython")
 
         -- unset these so that installing pip and setuptools puts them where we want
         -- and not into some other Python the user has installed.
-        import("package.tools.autoconf").configure(package, configs, {envs = {PYTHONHOME = "", PYTHONPATH = ""}})
-        os.vrunv("make", {"-j4", "PYTHONAPPSDIR=" .. package:installdir()})
-        os.vrunv("make", {"install", "-j4", "PYTHONAPPSDIR=" .. package:installdir()})
-        if pkgver:ge("3.0") then
-            os.cp(path.join(package:installdir("bin"), "python3"), path.join(package:installdir("bin"), "python"))
-            os.cp(path.join(package:installdir("bin"), "python3-config"), path.join(package:installdir("bin"), "python-config"))
-        end
+        os.setenv("PYTHONHOME", "")
+        os.setenv("PYTHONPATH", "")
+        import("package.tools.autoconf").install(package, configs, {makeconfigs = {PYTHONAPPSDIR = package:installdir()}})
+        os.cp(path.join(package:installdir("bin"), "python3"), path.join(package:installdir("bin"), "python"))
+        os.cp(path.join(package:installdir("bin"), "python3-config"), path.join(package:installdir("bin"), "python-config"))
     end)
 
     on_test(function (package)
