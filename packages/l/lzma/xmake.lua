@@ -21,5 +21,9 @@ package("lzma")
     end)
 
     on_test(function (package)
-        assert(package:has_cfuncs("LzmaCompress", {includes = "LzmaLib.h"}))
+        assert(package:check_csnippets({test = [[
+            void test() {
+                CLzmaEncHandle enc = LzmaEnc_Create(0); // for test only.
+            }
+        ]]}, {configs = {languages = "c99"}, includes = "LzmaEnc.h"}))
     end)
