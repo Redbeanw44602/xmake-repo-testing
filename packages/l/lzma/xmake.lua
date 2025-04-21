@@ -14,14 +14,8 @@ package("lzma")
             add_rules("mode.debug", "mode.release")
             target("lzma")
                 set_kind("$(kind)")
-                add_files("Alloc.c", "LzFind.c",  "Lzma2Dec.c", "Lzma2Enc.c", "LzmaDec.c", "LzmaEnc.c", "LzmaLib.c", "CpuArch.c")
-                add_headerfiles("7zTypes.h", "Alloc.h", "LzFind.h", "LzHash.h", "Lzma2Dec.h", "Lzma2Enc.h", "LzmaDec.h", "LzmaEnc.h", "LzmaLib.h")
-                if is_plat("windows") then
-                    add_files("LzFindMt.c", "LzFindOpt.c", "MtCoder.c", "MtDec.c", "Threads.c", "DllSecur.c", "Lzma2DecMt.c")
-                    add_headerfiles("LzFindMt.h", "Lzma2DecMt.h")
-                else
-                    add_defines("_7ZIP_ST")
-                end
+                add_files("*.c")
+                add_headerfiles("*.h")
         ]])
         import("package.tools.xmake").install(package, {kind = package:config("shared") and "shared" or "static"})
     end)
