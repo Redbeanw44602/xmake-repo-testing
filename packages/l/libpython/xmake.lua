@@ -159,9 +159,6 @@ package("libpython")
             table.insert(configs, "--build=" .. os.iorun("./config.guess"))
             table.insert(configs, "--with-build-python=" .. find_python3())
         end
-        if not package:dep("readline") then
-            table.insert(configs, "--without-readline")
-        end
 
         -- add openssl libs path
         local openssl = package:dep(package:config("openssl3") and "openssl3" or "openssl"):fetch()
