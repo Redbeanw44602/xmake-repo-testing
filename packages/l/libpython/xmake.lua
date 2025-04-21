@@ -66,7 +66,6 @@ package("libpython")
         package:add("deps", "libuuid")         -- py module 'uuuid'
         package:add("deps", "zlib")            -- py module 'gzip'
         package:add("deps", "ca-certificates") -- py module 'ssl'
-        package:add("deps", "libffi")          -- py module 'ctypes', TODO: android
         if pkgver:ge("3.10") then              -- py module 'sqlite3'
             package:add("deps", "sqlite3 >=3.7.15")
         elseif pkgver:ge("3.13") then
@@ -78,6 +77,11 @@ package("libpython")
             package:add("deps", "ncurses")  -- py module 'curses'
             package:add("deps", "readline") -- py module 'readline'
             package:add("deps", "libedit")  -- py module 'readline'
+        end
+
+        -- missing dependencies for android
+        if not is_plat("android") then
+            package:add("deps", "libffi") -- py module 'ctypes', TODO: android
         end
 
         -- missing dependencies for bsd, android, iphoneos
