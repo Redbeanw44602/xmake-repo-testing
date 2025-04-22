@@ -17,6 +17,7 @@ package("lzma")
             add_rules("mode.debug", "mode.release")
             target("lzma")
                 set_kind("$(kind)")
+                set_languages("c++98")
                 add_files("*.c")
                 add_headerfiles("*.h")
                 if is_plat("windows") then
