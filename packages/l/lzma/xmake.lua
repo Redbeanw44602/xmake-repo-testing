@@ -8,6 +8,9 @@ package("lzma")
     add_versions("24.09", "79b39f10b7b69eea293caa90c3e7ea07faf8f01f8ae9db1bb1b90c092375e5f3")
 
     add_links("lzma")
+    if is_plat("bsd") then
+        add_syslinks("pthread")
+    end
     on_install(function (package)
         os.cd("C")
         io.writefile("xmake.lua", [[
