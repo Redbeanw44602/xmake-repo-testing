@@ -11,7 +11,7 @@ package("lzma")
     if is_plat("bsd") then
         add_syslinks("pthread")
     end
-    on_install(function (package)
+    on_install(function (package) 
         os.cd("C")
         io.writefile("xmake.lua", [[
             add_rules("mode.debug", "mode.release")
