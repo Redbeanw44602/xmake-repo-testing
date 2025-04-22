@@ -23,10 +23,10 @@ package("lzma")
                 if is_plat("windows") then
                     add_files("Util/LzmaLib/LzmaLib.def")
                 end
-                if config.arch:startswith("arm") then
-                    add_cxflags("clang::-march=armv8-a+crc+crypto")
-                end
         ]])
+        if package:arch():startswith("arm") then
+            package:add("cxflags", "clang::-march=armv8-a+crc+crypto")
+        end
         import("package.tools.xmake").install(package, {kind = package:config("shared") and "shared" or "static"})
     end)
 
