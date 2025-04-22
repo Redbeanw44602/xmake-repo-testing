@@ -4,6 +4,7 @@ package("lzma")
     set_description("LZMA SDK")
 
     add_urls("https://www.7-zip.org/a/lzma$(version).7z", {version = function (version) return version:gsub("%.", "") end})
+    add_versions("23.01", "317dd834d6bbfd95433488b832e823cd3d4d420101436422c03af88507dd1370")
     add_versions("24.09", "79b39f10b7b69eea293caa90c3e7ea07faf8f01f8ae9db1bb1b90c092375e5f3")
 
     add_links("lzma")
@@ -21,7 +22,7 @@ package("lzma")
                 if is_plat("windows") then
                     add_files("Util/LzmaLib/LzmaLib.def")
                 end
-                if is_plat("iphoneos") then
+                if is_plat("android", "iphoneos") then
                     add_cxflags("-mcrc")
                 end
         ]])
