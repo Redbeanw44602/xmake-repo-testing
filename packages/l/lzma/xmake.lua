@@ -23,7 +23,7 @@ package("lzma")
                     add_files("Util/LzmaLib/LzmaLib.def")
                 end
                 if is_plat("android", "iphoneos") then
-                    add_cxflags("-mcrc")
+                    add_cxflags("-mcrypto", "-mcrc")
                 end
         ]])
         import("package.tools.xmake").install(package, {kind = package:config("shared") and "shared" or "static"})
