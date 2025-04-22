@@ -16,6 +16,12 @@ package("lzma")
                 set_kind("$(kind)")
                 add_files("*.c")
                 add_headerfiles("*.h")
+                if is_plat("windows") then
+                    add_files("Util/LzmaLib/LzmaLib.def")
+                end
+                if is_plat("iphoneos") then
+                    add_cxflags("-mcrc")
+                end
         ]])
         import("package.tools.xmake").install(package, {kind = package:config("shared") and "shared" or "static"})
     end)
@@ -23,7 +29,7 @@ package("lzma")
     on_test(function (package)
         assert(package:check_csnippets({test = [[
             void test() {
-                CLzmaEncHandle enc = LzmaEnc_Create(0); // for test only.
+                LzmaEnc_Create(0); // for test only.
             }
         ]]}, {configs = {languages = "c99"}, includes = "LzmaEnc.h"}))
     end)
