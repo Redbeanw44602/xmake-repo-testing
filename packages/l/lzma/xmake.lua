@@ -24,9 +24,9 @@ package("lzma")
                     add_files("Util/LzmaLib/LzmaLib.def")
                 end
         ]])
-        local cxflags = {}
+        local cxflags = ""
         if package:arch():startswith("arm") then
-            table.insert(cxflags, "-march=armv8-a+crc+crypto")
+            cxflags = "-march=armv8-a+crc+crypto"
         end
         import("package.tools.xmake").install(package, {
             cxflags = cxflags,
