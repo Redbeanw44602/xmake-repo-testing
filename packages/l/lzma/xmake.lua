@@ -20,6 +20,7 @@ package("lzma")
             add_rules("mode.debug", "mode.release")
             target("lzma")
                 set_kind("$(kind)")
+                set_languages("ansi")
                 add_files("*.c")
                 add_headerfiles("*.h")
                 if is_plat("windows") then
@@ -40,5 +41,5 @@ package("lzma")
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                 );
             }
-        ]]}, {configs = {languages = "c99"}, includes = "LzmaLib.h"}))
+        ]]}, {configs = {languages = "ansi"}, includes = "LzmaLib.h"}))
     end)
