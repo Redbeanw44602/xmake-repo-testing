@@ -24,10 +24,14 @@ package("lzma")
                     add_files("Util/LzmaLib/LzmaLib.def")
                 end
         ]])
+        local cxflags = {}
         if package:arch():startswith("arm") then
-            package:add("cxflags", "clang::-march=armv8-a+crc+crypto")
+            table.insert(cxflags, "-march=armv8-a+crc+crypto")
         end
-        import("package.tools.xmake").install(package, {kind = package:config("shared") and "shared" or "static"})
+        import("package.tools.xmake").install(package, {
+            cxflags = cxflags,
+            kind = package:config("shared") and "shared" or "static"
+        })
     end)
 
     on_test(function (package)
