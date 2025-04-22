@@ -4,7 +4,6 @@ package("lzma")
     set_description("LZMA SDK")
 
     add_urls("https://www.7-zip.org/a/lzma$(version).7z", {version = function (version) return version:gsub("%.", "") end})
-    add_versions("19.00", "00f569e624b3d9ed89cf8d40136662c4c5207eaceb92a70b1044c77f84234bad")
     add_versions("21.07", "833888f03c6628c8a062ce5844bb8012056e7ab7ba294c7ea232e20ddadf0d75")
     add_versions("22.01", "35b1689169efbc7c3c147387e5495130f371b4bad8ec24f049d28e126d52d9fe")
     add_versions("23.01", "317dd834d6bbfd95433488b832e823cd3d4d420101436422c03af88507dd1370")
@@ -20,7 +19,7 @@ package("lzma")
             add_rules("mode.debug", "mode.release")
             target("lzma")
                 set_kind("$(kind)")
-                set_languages("ansi")
+                set_languages("c99")
                 add_files("*.c")
                 add_headerfiles("*.h")
                 if is_plat("windows") then
@@ -41,5 +40,5 @@ package("lzma")
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                 );
             }
-        ]]}, {configs = {languages = "ansi"}, includes = "LzmaLib.h"}))
+        ]]}, {configs = {languages = "c99"}, includes = "LzmaLib.h"}))
     end)
