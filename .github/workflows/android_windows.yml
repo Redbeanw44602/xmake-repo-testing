@@ -12,7 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         arch: [armeabi-v7a, arm64-v8a]
-        ndk: ["r22", "r27"]
+        ndk: ["r22b", "r27c"]
         ndk_sdkver: ["30"]
 
     concurrency:
@@ -35,13 +35,12 @@ jobs:
 
       - name: Prepare
         run: |
-          if ("${{ matrix.ndk }}" -eq "r27") {
-            curl -fsSL "https://dl.google.com/android/repository/android-ndk-r27-windows.zip" -o android-ndk-r27-windows.zip
-            Expand-Archive ./android-ndk-r27-windows.zip -DestinationPath ./ndk
+          if ("${{ matrix.ndk }}" -eq "r22b") {
+            curl -fsSL "https://dl.google.com/android/repository/android-ndk-${{ matrix.ndk }}-windows-x86_64.zip" -o ndk.zip
           } else {
-            curl -fsSL "https://dl.google.com/android/repository/android-ndk-r22-windows-x86_64.zip" -o android-ndk-r22-windows-x86_64.zip
-            Expand-Archive ./android-ndk-r22-windows-x86_64.zip -DestinationPath ./ndk
+            curl -fsSL "https://dl.google.com/android/repository/android-ndk-${{ matrix.ndk }}-windows.zip" -o ndk.zip
           }
+          Expand-Archive ./ndk.zip -DestinationPath ./ndk
 
       - name: Tests
         run: |
