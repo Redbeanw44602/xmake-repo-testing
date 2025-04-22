@@ -24,7 +24,7 @@ package("lzma")
                 if is_plat("windows") then
                     add_files("Util/LzmaLib/LzmaLib.def")
                 end
-                if is_plat("iphoneos") then
+                if is_plat("android", "iphoneos") then
                     add_cxflags("-mcrc")
                 end
         ]])
