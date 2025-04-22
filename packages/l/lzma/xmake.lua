@@ -29,7 +29,10 @@ package("lzma")
     on_test(function (package)
         assert(package:check_csnippets({test = [[
             void test() {
-                LzmaEnc_Create(0); // for test only.
+                // we only test links...
+                LzmaCompress(
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                );
             }
-        ]]}, {configs = {languages = "c99"}, includes = "LzmaEnc.h"}))
+        ]]}, {configs = {languages = "c99"}, includes = "LzmaLib.h"}))
     end)
