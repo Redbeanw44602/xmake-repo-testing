@@ -4,7 +4,6 @@ package("xz")
 
     set_urls("https://github.com/tukaani-project/xz/releases/download/v$(version)/xz-$(version).tar.gz",
              "https://downloads.sourceforge.net/project/lzmautils/xz-$(version).tar.gz")
-    add_versions("5.2.5", "f6f4910fd033078738bd82bfba4f49219d03b17eb0794eb91efbae419f4aba10")
     add_versions("5.2.10", "eb7a3b2623c9d0135da70ca12808a214be9c019132baaa61c9e1d198d1d9ded3")
     add_versions("5.2.13", "2942a1a8397cd37688f79df9584947d484dd658db088d51b790317eb3184827b")
     add_versions("5.4.1", "e4b0f81582efa155ccf27bb88275254a429d44968e488fc94b806f2a61cd3e22")
@@ -14,6 +13,8 @@ package("xz")
     add_versions("5.8.1", "507825b599356c10dca1cd720c9d0d0c9d5400b9de300af00e4d1ea150795543")
 
     add_configs("shared", {description = "Build shared library.", default = false, type = "boolean", readonly = is_plat("wasm")})
+
+    add_patches(">=5.3.0 && <=5.8.0", "patches/xz-cve-2025-31115.patch", "ee188eabc3220684422f62df7a385541a86d2a5c385407f9d8fd94d49b251c4e")
 
     add_deps("cmake")
     on_load(function (package)
