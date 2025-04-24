@@ -14,6 +14,7 @@ package("xz")
 
     add_configs("shared", {description = "Build shared library.", default = false, type = "boolean", readonly = is_plat("wasm")})
 
+    add_patches("5.2.13", "patches/5.2.13/fix-unknown-cmake-command.patch", "88c58a0e4b73d9b3020dd95726908768fa17fdad54bf0cf2cfedfef5cf95f94b")
     add_patches(">=5.3.0 && <=5.8.0", "patches/xz-cve-2025-31115.patch", "ee188eabc3220684422f62df7a385541a86d2a5c385407f9d8fd94d49b251c4e")
 
     set_policy("package.cmake_generator.ninja", false)
