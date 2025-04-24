@@ -66,6 +66,7 @@ package("libpython")
         package:add("deps", "libuuid")         -- py module 'uuuid'
         package:add("deps", "zlib")            -- py module 'gzip'
         package:add("deps", "ca-certificates") -- py module 'ssl'
+        package:add("deps", "xz")              -- py module 'lzma'
         if pkgver:ge("3.10") then              -- py module 'sqlite3'
             package:add("deps", "sqlite3 >=3.7.15")
         elseif pkgver:ge("3.13") then
@@ -90,7 +91,6 @@ package("libpython")
         -- missing dependencies for bsd, android, iphoneos, wasm
         if not package:is_plat("bsd", "android", "iphoneos", "wasm") then
             package:add("deps", "mpdecimal")
-            package:add("deps", "lzma")
         end
         
         if package:config("openssl3") then -- py module 'ssl', 'hashlib'
@@ -140,6 +140,8 @@ package("libpython")
 
         -- init configs
         local configs = {}
+        local cflags = {}
+        local ldflags = {}
         table.insert(configs, "--libdir=" .. package:installdir("lib"))
         table.insert(configs, "--datadir=" .. package:installdir("share"))
         table.insert(configs, "--datarootdir=" .. package:installdir("share"))
@@ -155,9 +157,11 @@ package("libpython")
         end
 
         if package:is_cross() then
-            import("detect.tools.find_python3")
             table.insert(configs, "--build=" .. os.iorun("./config.guess"))
-            table.insert(configs, "--with-build-python=" .. find_python3())
+            table.insert(configs, "--with-build-python")
+        end
+        if package:is_plat("android", "iphoneos", "wasm") then
+            table.insert(configs, "--without-readline")
         end
 
         -- add openssl libs path
@@ -177,11 +181,7 @@ package("libpython")
                     end
                 end
                 if openssl_dir then
-                    if pkgver:ge("3.0") then
-                        table.insert(configs, "--with-openssl=" .. openssl_dir)
-                    else
-                        io.gsub("setup.py", "/usr/local/ssl", openssl_dir)
-                    end
+                    table.insert(configs, "--with-openssl=" .. openssl_dir)
                     break
                 end
             end
@@ -193,8 +193,6 @@ package("libpython")
         end
 
         -- add flags for macOS
-        local cppflags = {}
-        local ldflags = {}
         if package:is_plat("macosx") then
             -- get xcode information
             import("core.tool.toolchain")
@@ -215,13 +213,13 @@ package("libpython")
                 -- help Python's build system (setuptools/pip) to build things on SDK-based systems
                 -- the setup.py looks at "-isysroot" to get the sysroot (and not at --sysroot)
                 local xcode_sdkdir = xcode_dir .. "/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX" .. xcode_sdkver .. ".sdk"
-                table.insert(cppflags, "-isysroot " .. xcode_sdkdir)
-                table.insert(cppflags, "-I" .. path.join(xcode_sdkdir, "/usr/include"))
+                table.insert(cflags, "-isysroot " .. xcode_sdkdir)
+                table.insert(cflags, "-I" .. path.join(xcode_sdkdir, "/usr/include"))
                 table.insert(ldflags, "-isysroot " .. xcode_sdkdir)
 
                 -- for the Xlib.h, Python needs this header dir with the system Tk
                 -- yep, this needs the absolute path where zlib needed a path relative to the SDK.
-                table.insert(cppflags, "-I" .. path.join(xcode_sdkdir, "/System/Library/Frameworks/Tk.framework/Versions/8.5/Headers"))
+                table.insert(cflags, "-I" .. path.join(xcode_sdkdir, "/System/Library/Frameworks/Tk.framework/Versions/8.5/Headers"))
             end
 
             -- avoid linking to libgcc https://mail.python.org/pipermail/python-dev/2012-February/116205.html
@@ -232,14 +230,7 @@ package("libpython")
 
         -- add pic
         if package:is_plat("linux", "bsd") and package:config("pic") ~= false then
-            table.insert(cppflags, "-fPIC")
-        end
-
-        if #cppflags > 0 then
-            table.insert(configs, "CPPFLAGS=" .. table.concat(cppflags, " "))
-        end
-        if #ldflags > 0 then
-            table.insert(configs, "LDFLAGS=" .. table.concat(ldflags, " "))
+            table.insert(cflags, "-fPIC")
         end
 
         -- https://github.com/python/cpython/issues/109796
@@ -256,7 +247,7 @@ package("libpython")
         -- and not into some other Python the user has installed.
         os.setenv("PYTHONHOME", "")
         os.setenv("PYTHONPATH", "")
-        import("package.tools.autoconf").install(package, configs, {makeconfigs = {PYTHONAPPSDIR = package:installdir()}})
+        import("package.tools.autoconf").install(package, configs, {cflags = cflags, ldflags = ldflags, makeconfigs = {PYTHONAPPSDIR = package:installdir()}})
         os.cp(path.join(package:installdir("bin"), "python3"), path.join(package:installdir("bin"), "python"))
         os.cp(path.join(package:installdir("bin"), "python3-config"), path.join(package:installdir("bin"), "python-config"))
     end)
