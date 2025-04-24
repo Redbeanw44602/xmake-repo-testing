@@ -4,7 +4,6 @@ package("xz")
 
     set_urls("https://github.com/tukaani-project/xz/releases/download/v$(version)/xz-$(version).tar.gz",
              "https://downloads.sourceforge.net/project/lzmautils/xz-$(version).tar.gz")
-    add_versions("5.2.10", "eb7a3b2623c9d0135da70ca12808a214be9c019132baaa61c9e1d198d1d9ded3")
     add_versions("5.2.11", "0089d47b966bd9ab48f1d01baf7ce146a3b591716c7477866b807010de3d96ab")
     add_versions("5.2.12", "61bda930767dcb170a5328a895ec74cab0f5aac4558cdda561c83559db582a13")
     add_versions("5.2.13", "2942a1a8397cd37688f79df9584947d484dd658db088d51b790317eb3184827b")
@@ -37,6 +36,7 @@ package("xz")
     on_install(function (package)
         local configs = {
             "-DXZ_NLS=OFF",
+            "-DENABLE_NLS=OFF", -- before 5.8
             "-DXZ_TOOL_XZDEC=OFF",
             "-DXZ_TOOL_LZMADEC=OFF",
             "-DXZ_TOOL_LZMAINFO=OFF",
@@ -49,8 +49,11 @@ package("xz")
         }
         table.insert(configs, "-DCMAKE_BUILD_TYPE=" .. (package:debug() and "Debug" or "Release"))
         table.insert(configs, "-DBUILD_SHARED_LIBS=" .. (package:config("shared") and "ON" or "OFF"))
-
-        import("package.tools.cmake").install(package, configs)
+        local cxflags
+        if not package:is_plat("windows") and package:is_arch("arm.*") then
+            cxflags = "-march=armv8-a+crc+crypto"
+        end
+        import("package.tools.cmake").install(package, configs, {cxflags = cxflags})
     end)
 
     on_test(function (package)
