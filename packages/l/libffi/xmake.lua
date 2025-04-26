@@ -32,7 +32,7 @@ package("libffi")
     end)
 
     on_load("macosx", "linux", "bsd", "mingw", function (package)
-        package:add("deps", "autoconf", "libtool", "texinfo")
+        package:add("deps", "autoconf", "libtool")
         package:add("deps", "automake <1.17") -- https://github.com/libffi/libffi/issues/853#issuecomment-2306885792
     end)
 
@@ -47,15 +47,14 @@ package("libffi")
     on_install("macosx", "linux", "bsd", "mingw", function (package)
         -- https://github.com/libffi/libffi/issues/127
         local configs = {
+            "--disable-docs",
             "--disable-silent-rules",
             "--disable-dependency-tracking",
             "--disable-multi-os-directory"
         }
         table.insert(configs, "--enable-shared=" .. (package:config("shared") and "yes" or "no"))
         table.insert(configs, "--enable-static=" .. (package:config("shared") and "no" or "yes"))
-        if package:debug() then
-            table.insert(configs, "--enable-debug")
-        end
+        table.insert(configs, "--enable-debug=" .. (package:config("debug") and "yes" or "no"))
         import("package.tools.autoconf").install(package, configs)
     end)
 
