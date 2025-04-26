@@ -41,7 +41,7 @@ package("libffi")
     --     os.cp(path.join(os.scriptdir(), "port", "xmake.lua"), "xmake.lua")
     --     import("package.tools.xmake").install(package, {
     --         vers = package:version_str()
-    --     })
+    --     }) 
     -- end)
 
     on_install("macosx", "linux", "bsd", "mingw", function (package)
