@@ -32,12 +32,12 @@ package("libffi")
     end)
 
     on_load("macosx", "linux", "bsd", "mingw", function (package)
-        package:add("deps", "autoconf", "libtool")
+        package:add("deps", "autoconf", "libtool", "texinfo")
         package:add("deps", "automake <1.17") -- https://github.com/libffi/libffi/issues/853#issuecomment-2306885792
     end)
 
     on_install("windows", "iphoneos", "cross", function (package)
-        io.gsub("fficonfig.h.in", "# *undef (.-)\n", "${define %1}\n")
+        -- io.gsub("fficonfig.h.in", "# *undef (.-)\n", "${define %1}\n")
         os.cp(path.join(os.scriptdir(), "port", "xmake.lua"), "xmake.lua")
         import("package.tools.xmake").install(package, {
             vers = package:version_str()
@@ -46,7 +46,11 @@ package("libffi")
 
     on_install("macosx", "linux", "bsd", "mingw", function (package)
         -- https://github.com/libffi/libffi/issues/127
-        local configs = {"--disable-silent-rules", "--disable-dependency-tracking", "--disable-multi-os-directory"}
+        local configs = {
+            "--disable-silent-rules",
+            "--disable-dependency-tracking",
+            "--disable-multi-os-directory"
+        }
         table.insert(configs, "--enable-shared=" .. (package:config("shared") and "yes" or "no"))
         table.insert(configs, "--enable-static=" .. (package:config("shared") and "no" or "yes"))
         if package:debug() then
