@@ -36,13 +36,13 @@ package("libffi")
         package:add("deps", "automake <1.17") -- https://github.com/libffi/libffi/issues/853#issuecomment-2306885792
     end)
 
-    on_install("windows", "iphoneos", "cross", function (package)
-        -- io.gsub("fficonfig.h.in", "# *undef (.-)\n", "${define %1}\n")
-        os.cp(path.join(os.scriptdir(), "port", "xmake.lua"), "xmake.lua")
-        import("package.tools.xmake").install(package, {
-            vers = package:version_str()
-        })
-    end)
+    -- on_install("windows", "iphoneos", "cross", function (package)
+    --     io.gsub("fficonfig.h.in", "# *undef (.-)\n", "${define %1}\n")
+    --     os.cp(path.join(os.scriptdir(), "port", "xmake.lua"), "xmake.lua")
+    --     import("package.tools.xmake").install(package, {
+    --         vers = package:version_str()
+    --     })
+    -- end)
 
     on_install("macosx", "linux", "bsd", "mingw", function (package)
         -- https://github.com/libffi/libffi/issues/127
