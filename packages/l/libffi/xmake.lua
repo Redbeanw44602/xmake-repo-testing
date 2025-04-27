@@ -4,8 +4,6 @@ package("libffi")
     set_license("MIT")
 
     set_urls("https://github.com/libffi/libffi/archive/refs/tags/$(version).tar.gz")
-    add_versions("v3.2", "6c3fb7bb571cbb4bc92d9f256c9a339615df55b4177c853711b85420e1bbee84")
-    add_versions("v3.2.1", "96d08dee6f262beea1a18ac9a3801f64018dc4521895e9198d029d6850febe23")
     add_versions("v3.3", "3f2f86094f5cf4c36cfe850d2fe029d01f5c2c2296619407c8ba0d8207da9a6b")
     add_versions("v3.4.0", "f6cf553720c7b7d901123acab8f3383778e51cd4da4cf0d0f88e54282422e58e")
     add_versions("v3.4.1", "d55328d89aae2c13439148a6102bcb66e272dffc0a8567475db52717ad290e6a")
@@ -32,7 +30,7 @@ package("libffi")
     end)
 
     on_load("macosx", "linux", "bsd", "mingw", function (package)
-        package:add("deps", "autoconf", "libtool", "texinfo")
+        package:add("deps", "autoconf", "libtool")
         package:add("deps", "automake <1.17") -- https://github.com/libffi/libffi/issues/853#issuecomment-2306885792
     end)
 
