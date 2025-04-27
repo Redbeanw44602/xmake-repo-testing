@@ -32,7 +32,7 @@ package("libffi")
     end)
 
     on_load("macosx", "linux", "bsd", "mingw", function (package)
-        package:add("deps", "autoconf", "libtool")
+        package:add("deps", "autoconf", "libtool", "texinfo")
         package:add("deps", "automake <1.17") -- https://github.com/libffi/libffi/issues/853#issuecomment-2306885792
     end)
 
