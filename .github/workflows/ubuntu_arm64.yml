@@ -34,4 +34,4 @@ jobs:
 
       - name: Tests
         run: |
-          xmake l ./scripts/test.lua -vD -k ${{ matrix.kind }} -m ${{ matrix.mode }} --jobs=2 --linkjobs=2
+          xmake l ./scripts/test.lua -vD -k ${{ matrix.kind }} -m ${{ matrix.mode }} --jobs=2 --linkjobs=1
