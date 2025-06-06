@@ -21,17 +21,17 @@ jobs:
       group: ${{ github.ref }}-${{ github.base_ref }}-${{ github.head_ref }}-Android-${{ matrix.arch }}-${{ matrix.ndk }}-${{ matrix.ndk_sdkver }}
       cancel-in-progress: true
     steps:
-      - name: Maximize build space
-        uses: easimon/maximize-build-space@master
-        with:
-          build-mount-path: /home/runner/.xmake
-          root-reserve-mb: 10240
-          temp-reserve-mb: 10240
-          remove-dotnet: true
-          remove-android: true
-          remove-haskell: true
-          remove-codeql: true
-          remove-docker-images: true
+#      - name: Maximize build space
+#        uses: easimon/maximize-build-space@master
+#        with:
+#          build-mount-path: /home/runner/.xmake
+#          root-reserve-mb: 10240
+#          temp-reserve-mb: 10240
+#          remove-dotnet: true
+#          remove-android: true
+#          remove-haskell: true
+#          remove-codeql: true
+#          remove-docker-images: true
 
       - uses: actions/checkout@v4
         with:
@@ -54,4 +54,4 @@ jobs:
 
       - name: Tests
         run: |
-          xmake l ./scripts/test.lua -vD -p android --ndk=`pwd`/android-ndk-${{ matrix.ndk }} --ndk_sdkver=${{ matrix.ndk_sdkver }} -a ${{ matrix.arch }} --jobs=2 --linkjobs=1
+          xmake l ./scripts/test.lua -vD -p android --ndk=`pwd`/android-ndk-${{ matrix.ndk }} --ndk_sdkver=${{ matrix.ndk_sdkver }} -a ${{ matrix.arch }}
