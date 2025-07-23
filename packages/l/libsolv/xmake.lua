@@ -1,0 +1,170 @@
+package("libsolv")
+    set_homepage("https://github.com/openSUSE/libsolv")
+    set_description("Library for solving packages and reading repositories.")
+    set_license("BSD-3-Clause")
+
+    add_urls("https://github.com/openSUSE/libsolv/archive/refs/tags/$(version).tar.gz",
+             "https://github.com/openSUSE/libsolv.git")
+
+    add_versions("0.7.34", "fd9c8a75d3ca09d9ff7b0d160902fac789b3ce6f9fb5b46a7647895f9d3eaf05")
+
+     -- needs rpm, rpmdb, rpmio, rpmmisc, db
+    add_configs("rpmdb",             {description = "Build with rpm database support.", default = false, type = "boolean"})
+    add_configs("rpmdb_librpm",      {description = "Use librpm to access the rpm database.", default = false, type = "boolean"})
+    add_configs("rpmdb_bdb",         {description = "Use BerkeleyDB to access the rpm database.", default = false, type = "boolean"})
+    add_configs("rpmdb_byrpmheader", {description = "Build with rpmdb Header support.", default = false, type = "boolean"})
+    add_configs("rpmpkg",            {description = "Build with rpm package support.", default = false, type = "boolean"})
+    add_configs("rpmpkg_librpm",     {description = "Use librpm to access rpm header information.", default = false, type = "boolean"})
+    add_configs("pubkey",            {description = "Build with pubkey support.", default = false, type = "boolean"})
+    add_configs("rpmmd",             {description = "Build with rpmmd repository support.", default = false, type = "boolean"})
+    add_configs("rpm5",              {description = "Enabling RPM 5 support.", default = false, type = "boolean"})
+
+    add_configs("suserepo",  {description = "Build with suse repository support.", default = false, type = "boolean"})
+    add_configs("comps",     {description = "Build with fedora comps support.", default = false, type = "boolean"})
+    add_configs("helixrepo", {description = "Build with helix repository support.", default = false, type = "boolean"})
+    add_configs("debian",    {description = "Build with debian package/repository support.", default = false, type = "boolean"})
+    add_configs("mdkrepo",   {description = "Build with mandriva/mageia repository support.", default = false, type = "boolean"})
+    add_configs("archrepo",  {description = "Build with archlinux repository support.", default = false, type = "boolean"})
+    add_configs("apk",       {description = "Build with apk package/repository support.", default = false, type = "boolean"})
+    add_configs("cudfrepo",  {description = "Build with cudf repository support.", default = false, type = "boolean"})
+
+    add_configs("haiku",     {description = "Build with Haiku package support.", default = false, type = "boolean"})
+    add_configs("conda",     {description = "Build with conda dependency support.", default = false, type = "boolean"})
+    add_configs("appdata",   {description = "Build with AppStream appdata support.", default = false, type = "boolean"})
+    add_configs("multi_semantics", {description = "Build with support for multiple distribution types.", default = false, type = "boolean"})
+
+    add_configs("lzma_compression",   {description = "Build with lzma/xz compression support.", default = false, type = "boolean"})
+    add_configs("bzip2_compression",  {description = "Build with bzip2 compression support.", default = false, type = "boolean"})
+    add_configs("zstd_compression",   {description = "Build with zstd compression support.", default = false, type = "boolean"})
+    add_configs("zchunk_compression", {description = "Build with zchunk compression support.", default = false, type = "boolean"})
+
+    add_configs("with_system_zchunk", {description = "Use system zchunk library.", default = false, type = "boolean"})
+    add_configs("with_libxml2",       {description = "Build with libxml2 instead of libexpat.", default = false, type = "boolean"})
+    add_configs("without_cookieopen", {description = "Disable the use of stdio cookie opens.", default = false, type = "boolean"})
+
+    add_configs("FEDORA",    {description = "Building for Fedora.", default = false, type = "boolean"})
+    add_configs("DEBIAN",    {description = "Building for Debian.", default = false, type = "boolean"})
+    add_configs("SUSE",      {description = "Building for SUSE.", default = false, type = "boolean"})
+    add_configs("ARCHLINUX", {description = "Building for Archlinux.", default = false, type = "boolean"})
+    add_configs("MANDRIVA",  {description = "Building for Mandriva.", default = false, type = "boolean"})
+    add_configs("MAGEIA",    {description = "Building for Mageia.", default = false, type = "boolean"})
+    add_configs("HAIKU",     {description = "Building for Haiku.", default = false, type = "boolean"}) -- needs haiku be, network, package.
+
+    add_deps("cmake")
+    if not is_plat("windows") then
+        add_deps("pkg-config")
+    else
+        add_deps("pkgconf")
+    end
+    on_load(function (package)
+        local apk_enabled = package:config("apk")
+        local archrepo_enabled = package:config("archrepo")
+        local debian_enabled = package:config("debian")
+        local rpm5_enabled = package:config("rpm5")
+        local rpmmd_enabled = package:config("rpmmd")
+        local suserepo_enabled = package:config("suserepo")
+        local helixrepo_enabled = package:config("helixrepo")
+        local mdkrepo_enabled = package:config("mdkrepo")
+        local appdata_enabled = package:config("appdata")
+        local comps_enabled = package:config("comps")
+        local lzma_compression_enabled = package:config("lzma_compression")
+        local zstd_compression_enabled = package:config("zstd_compression")
+        local with_system_zchunk = package:config("with_system_zchunk")
+        local zchunk_compression_enabled = package:config("zchunk_compression")
+        local libxml2_or_expat_enabled = false
+
+        if package:config("ARCHLINUX") then
+            archrepo_enabled = true
+        end
+        if package:config("MANDRIVA") then
+            mdkrepo_enabled = true
+        end
+        if package:config("MAGEIA") then
+            mdkrepo_enabled = true
+            lzma_compression_enabled = true
+        end
+        if package:config("DEBIAN") then
+            debian_enabled = true
+        end
+        if package:config("SUSE") then
+            suserepo_enabled = true
+            helixrepo_enabled = true
+        end
+
+        if rpm5_enabled then
+            rpmmd_enabled = true
+        end
+        if archrepo_enabled or debian_enabled then
+            lzma_compression_enabled = true
+        end
+        if apk_enabled then
+            zstd_compression_enabled = true
+        end
+        if rpmmd_enabled or suserepo_enabled or appdata_enabled or comps_enabled or helixrepo_enabled or mdkrepo_enabled then
+            libxml2_or_expat_enabled = true
+        end
+        if with_system_zchunk then
+            zchunk_compression_enabled = true
+        end
+
+        package:add("deps", "zlib")
+        if lzma_compression_enabled then
+            package:add("deps", "xz")
+        end
+        if package:config("bzip2_compression") then
+            package:add("deps", "bzip2")
+        end
+        if zstd_compression_enabled then
+            package:add("deps", "zstd")
+        end
+        -- TODO: xrepo missing deps.
+        -- if zchunk_compression_enabled then
+        --     package:add("deps", "zchunk", {system = with_system_zchunk})
+        -- end
+        if libxml2_or_expat_enabled then
+            if package:config("with_libxml2") then
+                package:add("deps", "libxml2")
+            else
+                package:add("deps", "expat")
+            end
+        end
+    end)
+
+    on_install(function (package)
+        local configs = {}
+        table.insert(configs, "-DENABLE_STATIC=" .. (package:config("shared") and "OFF" or "ON"))
+        table.insert(configs, "-DDISABLE_SHARED=" .. (package:config("shared") and "OFF" or "ON"))
+
+        local options = {
+            "rpmdb", "rpmdb_librpm", "rpmdb_bdb", "rpmdb_byrpmheader", "rpmpkg", "rpmpkg_librpm", "pubkey", "rpmmd", "rpm5",
+            "suserepo", "comps", "helixrepo", "debian", "mdkrepo", "archrepo", "apk", "cudfrepo",
+            "haiku", "conda", "appdata", "multi_semantics",
+            "lzma_compression", "bzip2_compression", "zstd_compression", "zchunk_compression",
+            "with_system_zchunk", "with_libxml2", "without_cookieopen"
+        }
+        local no_prefix_options = {
+            "multi_semantics", "with_system_zchunk", "with_libxml2", "without_cookieopen", "rpm5"
+        }
+        for _, option in ipairs(options) do
+            if package:config(option) then
+                if not table.contains(no_prefix_options, option) then
+                    table.insert(configs, ("-DENABLE_%s=ON"):format(option:upper()))
+                else
+                    table.insert(configs, ("-D%s=ON"):format(option:upper()))
+                end
+            end
+        end
+
+        io.replace("CMakeLists.txt", "ADD_SUBDIRECTORY (tools)", "", {plain = true})
+        io.replace("CMakeLists.txt", "ADD_SUBDIRECTORY (examples)", "", {plain = true})
+        io.replace("CMakeLists.txt", "ADD_SUBDIRECTORY (doc)", "", {plain = true})
+        import("package.tools.cmake").install(package, configs)
+    end)
+
+    on_test(function (package)
+        assert(package:check_csnippets({test = [[
+            void test() {
+                Pool *pool = pool_create();
+            }
+        ]]}, {configs = {languages = "c99"}, includes = "solv/pool.h"}))
+    end)
