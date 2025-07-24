@@ -174,12 +174,13 @@ package("libsolv")
         io.replace("ext/CMakeLists.txt", "testcase.c", "", {plain = true})
         io.replace("ext/CMakeLists.txt", "testcase.h", "", {plain = true})
 
+        local cflags = {}
         if package:is_plat("android") then
             -- to fix compile on (armeabi-v7a, r27, 21), funopen is missing.
-            package:add("defines", "__USE_BSD")
+            table.insert(cflags, "-D__USE_BSD=1")
         end
 
-        import("package.tools.cmake").install(package, configs)
+        import("package.tools.cmake").install(package, configs, {cflags = cflags})
     end)
 
     on_test(function (package)
