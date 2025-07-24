@@ -40,7 +40,14 @@ package("libusb")
         add_ldflags("--bind", "-s ASYNCIFY=1")
     end
 
-    on_install("!iphoneos", function (package)
+    on_check("wasm", function (target)
+        if package:version() and package:version():le("1.0.26") then
+            raise("package(libusb <=1.0.26) unsupported platform!")
+        end
+    end)
+
+    -- @see https://github.com/libusb/libusb-cmake/issues/33#issuecomment-3028680966
+    on_install("!iphoneos and !bsd", function (package)
         local dir = package:resourcefile("libusb-cmake")
         os.cp(path.join(dir, "CMakeLists.txt"), os.curdir())
         os.cp(path.join(dir, "config.h.in"), os.curdir())
