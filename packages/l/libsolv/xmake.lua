@@ -140,6 +140,11 @@ package("libsolv")
                 package:add("deps", "expat")
             end
         end
+
+        if package:is_plat("android") then
+            -- to fix compile on (armeabi-v7a, r27, 21), funopen is missing.
+            package:add("defines", "__USE_BSD")
+        end
     end)
 
     on_install(function (package)
