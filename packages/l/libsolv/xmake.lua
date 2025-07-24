@@ -8,7 +8,7 @@ package("libsolv")
 
     add_versions("0.7.34", "fd9c8a75d3ca09d9ff7b0d160902fac789b3ce6f9fb5b46a7647895f9d3eaf05")
 
-    add_patches("*", "patches/fix-msvc-c2036.patch", "02b04884793be2bc5c0904e2a2ee67474f9e5dcccbcd84fb4669d10ce5577f2c")
+    add_patches("*", "patches/fix-msvc-c2036.patch", "b472576d7fbfb16015d51b6bd50386e6cbf75073f5735fe23257ad3c379cc79b")
 
      -- needs rpm, rpmdb, rpmio, rpmmisc, db
     add_configs("rpmdb",             {description = "Build with rpm database support.", default = false, type = "boolean"})
