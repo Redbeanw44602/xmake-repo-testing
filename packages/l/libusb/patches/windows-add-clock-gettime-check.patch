@@ -32,13 +32,13 @@ index 24ac095c..1f4b6835 100644
  
  // NB: MSVC6 does not support named initializers.
  const struct usbi_os_backend usbi_backend = {
-diff --git a/libusb/version_nano.h b/libusb/version_nano.h
-index 045fb83c..35ee140b 100644
---- a/libusb/version_nano.h
-+++ b/libusb/version_nano.h
-@@ -1 +1 @@
--#define LIBUSB_NANO 11730
-+#define LIBUSB_NANO 11731
--- 
-2.50.1
+# diff --git a/libusb/version_nano.h b/libusb/version_nano.h
+# index 045fb83c..35ee140b 100644
+# --- a/libusb/version_nano.h
+# +++ b/libusb/version_nano.h
+# @@ -1 +1 @@
+# -#define LIBUSB_NANO 11730
+# +#define LIBUSB_NANO 11731
+# -- 
+# 2.50.1
 

@@ -13,7 +13,7 @@ package("libusb")
 
     add_resources(">=1.0.26", "libusb-cmake", "https://github.com/libusb/libusb-cmake.git", "8f0b4a38fc3eefa2b26a99dff89e1c12bf37afd4")
 
-    add_patches("v1.0.26", "patches/windows-add-clock-gettime-check.patch", "922516a48d715b552ef6b6707e4f461c8adac203c1334044ec0a6c1b9a2d0ac9")
+    add_patches("v1.0.26", "patches/windows-add-clock-gettime-check.patch", "38cc23fd5a9c2445951dbe6c6f19e677d333f82332ff5be18a4f362637265f0d")
 
     if is_plat("macosx") then
         add_extsources("brew::libusb")
