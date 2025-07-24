@@ -8,6 +8,8 @@ package("libsolv")
 
     add_versions("0.7.34", "fd9c8a75d3ca09d9ff7b0d160902fac789b3ce6f9fb5b46a7647895f9d3eaf05")
 
+    add_patches("*", "patches/fix-msvc-c2036.patch", "02b04884793be2bc5c0904e2a2ee67474f9e5dcccbcd84fb4669d10ce5577f2c")
+
      -- needs rpm, rpmdb, rpmio, rpmmisc, db
     add_configs("rpmdb",             {description = "Build with rpm database support.", default = false, type = "boolean"})
     add_configs("rpmdb_librpm",      {description = "Use librpm to access the rpm database.", default = false, type = "boolean"})
@@ -40,7 +42,11 @@ package("libsolv")
 
     add_configs("with_system_zchunk", {description = "Use system zchunk library.", default = false, type = "boolean"})
     add_configs("with_libxml2",       {description = "Build with libxml2 instead of libexpat.", default = false, type = "boolean"})
-    add_configs("without_cookieopen", {description = "Disable the use of stdio cookie opens.", default = false, type = "boolean"})
+    if not is_plat("windows") then
+        add_configs("without_cookieopen", {description = "Disable the use of stdio cookie opens.", default = false, type = "boolean"})
+    else
+        add_configs("without_cookieopen", {description = "Disable the use of stdio cookie opens.", default = true, type = "boolean", readonly = true})
+    end
 
     add_configs("FEDORA",    {description = "Building for Fedora.", default = false, type = "boolean"})
     add_configs("DEBIAN",    {description = "Building for Debian.", default = false, type = "boolean"})
@@ -51,7 +57,7 @@ package("libsolv")
     add_configs("HAIKU",     {description = "Building for Haiku.", default = false, type = "boolean"}) -- needs haiku be, network, package.
 
     add_deps("cmake")
-    if not is_plat("windows") then
+    if not is_subhost("windows") then
         add_deps("pkg-config")
     else
         add_deps("pkgconf")
