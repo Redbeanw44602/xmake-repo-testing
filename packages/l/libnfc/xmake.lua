@@ -27,6 +27,9 @@ package("libnfc")
 
     add_deps("cmake")
     add_deps("libusb")
+    if not is_subhost("windows") then
+        add_deps("pkg-config")
+    end
     -- TODO: xrepo missing deps.
     -- add_deps("pcsc")
     on_install(function (package)
