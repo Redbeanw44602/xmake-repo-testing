@@ -1,7 +1,7 @@
-From 7ef519fa0c5e76295f26a58702206e0b6086c6d4 Mon Sep 17 00:00:00 2001
+From c56131ef7d3e707fc3b2acc404bb986b5498091a Mon Sep 17 00:00:00 2001
 From: Redbeanw44602 <redbeana44945@gmail.com>
-Date: Thu, 24 Jul 2025 12:43:07 +0800
-Subject: [PATCH] fix msvc c2036
+Date: Thu, 24 Jul 2025 13:42:07 +0800
+Subject: [PATCH] fix msvc c2036.
 
 ---
  src/repo_write.c | 2 +-
