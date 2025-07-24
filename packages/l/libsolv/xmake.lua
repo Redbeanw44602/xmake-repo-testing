@@ -168,8 +168,6 @@ package("libsolv")
         io.replace("ext/CMakeLists.txt", "repo_testcase.c", "", {plain = true})
         io.replace("ext/CMakeLists.txt", "testcase.c", "", {plain = true})
         io.replace("ext/CMakeLists.txt", "testcase.h", "", {plain = true})
-        io.replace("CMakeLists.txt", "SET(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)", "SET(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)\nSET(CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS ON)", {plain = true})
-        
         import("package.tools.cmake").install(package, configs)
     end)
 
