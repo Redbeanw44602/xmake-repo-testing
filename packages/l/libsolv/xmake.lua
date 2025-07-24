@@ -175,11 +175,15 @@ package("libsolv")
         io.replace("ext/CMakeLists.txt", "testcase.h", "", {plain = true})
 
         local cflags = {}
-        if package:is_plat("android") then
-            -- to fix compile on (armeabi-v7a, r27, 21), funopen is missing.
-            table.insert(cflags, "-D__USE_BSD=1")
+        if not package:config("without_cookieopen") then
+            if package:is_plat("android") and package:is_arch("armeabi-v7a") then
+                local ndk_sdkver = package:toolchain("ndk"):config("ndk_sdkver")
+                if ndk_sdkver and tonumber(ndk_sdkver) < 24 then
+                    table.insert(cflags, "-D__USE_BSD=1")
+                    io.replace("CMakeLists.txt", "ADD_DEFINITIONS (-D_FILE_OFFSET_BITS=64)", "", {plain = true})
+                end
+            end
         end
-
         import("package.tools.cmake").install(package, configs, {cflags = cflags})
     end)
 
