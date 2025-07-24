@@ -11,6 +11,11 @@ package("libsolv")
     add_patches("<=0.7.34", "patches/fix-msvc-c2036.patch", "a924517033d4f8ba18e922e892953834d3ca1a4fa5a69ae04fd308df40d1b2e8")
     add_patches("<=0.7.34", "patches/fix-compile-on-mingw-w64.patch", "e6ba565110c918363a4499a4fc949f29777e0a189f192c231c81a47da821d21d")
 
+    -- CMake cannot export all symbols.
+    if is_plat("mingw", "msys", "cygwin") then
+        add_configs("shared", {description = "Build shared library.", default = false, type = "boolean", readonly = true})
+    end
+
      -- needs rpm, rpmdb, rpmio, rpmmisc, db
     add_configs("rpmdb",             {description = "Build with rpm database support.", default = false, type = "boolean"})
     add_configs("rpmdb_librpm",      {description = "Use librpm to access the rpm database.", default = false, type = "boolean"})
