@@ -140,11 +140,6 @@ package("libsolv")
                 package:add("deps", "expat")
             end
         end
-
-        if package:is_plat("android") then
-            -- to fix compile on (armeabi-v7a, r27, 21), funopen is missing.
-            package:add("defines", "__USE_BSD")
-        end
     end)
 
     on_install(function (package)
@@ -178,6 +173,12 @@ package("libsolv")
         io.replace("ext/CMakeLists.txt", "repo_testcase.c", "", {plain = true})
         io.replace("ext/CMakeLists.txt", "testcase.c", "", {plain = true})
         io.replace("ext/CMakeLists.txt", "testcase.h", "", {plain = true})
+
+        if package:is_plat("android") then
+            -- to fix compile on (armeabi-v7a, r27, 21), funopen is missing.
+            package:add("defines", "__USE_BSD")
+        end
+
         import("package.tools.cmake").install(package, configs)
     end)
 
