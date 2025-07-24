@@ -179,7 +179,6 @@ package("libsolv")
             if package:is_plat("android") and package:is_arch("armeabi-v7a") then
                 local ndk_sdkver = package:toolchain("ndk"):config("ndk_sdkver")
                 if ndk_sdkver and tonumber(ndk_sdkver) < 24 then
-                    table.insert(cflags, "-D__USE_BSD=1")
                     io.replace("CMakeLists.txt", "ADD_DEFINITIONS (-D_FILE_OFFSET_BITS=64)", "", {plain = true})
                 end
             end
