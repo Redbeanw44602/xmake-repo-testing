@@ -10,6 +10,10 @@ package("libusb-compat")
 
     add_deps("libusb")
 
+    on_load("wasm", function (package)
+        package:add("defines", "PATH_MAX=4096")
+    end)
+
     -- libusb does not support iOS and FreeBSD.
     -- libusb-compat compatibility layer does not support bare win32
     on_install("!iphoneos and !bsd and !windows", function (package)
@@ -17,9 +21,6 @@ package("libusb-compat")
             #define API_EXPORTED __attribute__((visibility("default")))
             #define ENABLE_DEBUG_LOGGING 0
             #define ENABLE_LOGGING 1
-            #ifndef PATH_MAX
-            #define PATH_MAX 4096
-            #endif
         ]])
         io.writefile("xmake.lua", [[
             add_rules("mode.debug", "mode.release")
