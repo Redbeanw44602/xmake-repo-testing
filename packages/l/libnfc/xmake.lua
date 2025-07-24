@@ -26,6 +26,9 @@ package("libnfc")
     add_configs("pn53x_usb",    {description = "Enable PN531 and PN531 USB support (Depends on libusb)", default = true, type = "boolean"})
 
     add_deps("cmake")
+    add_deps("libusb")
+    -- TODO: xrepo missing deps.
+    -- add_deps("pcsc")
     on_install(function (package)
         local configs = {
             "-DBUILD_EXAMPLES=OFF"
