@@ -16,7 +16,7 @@ package("libpcsclite")
         io.replace("meson.build", "library%('pcscspy'.-%)", "")
         io.replace("meson.build", "run_command%('pod2man'.-%)", "")
         io.replace("meson.build", [[install_data('pcsc-spy.1',
-    install_dir : join_paths(get_option('mandir'), 'man1'))]], "", {plain = true})
+  install_dir : join_paths(get_option('mandir'), 'man1'))]], "", {plain = true})
         io.replace("meson.build", [[gen_flex = generator(find_program('flex'),
   output : '@BASENAME@.c',
   arguments : ['-o', '@OUTPUT@', '--prefix=@BASENAME@', '@INPUT@'])]], "", {plain = true})
