@@ -9,11 +9,17 @@ package("libpcsclite")
 
     add_configs("embedded", {description = "For embedded systems [limit RAM and CPU resources by disabling features (log)].", default = false, type = "boolean"})
 
-    add_deps("meson")
+    add_deps("meson", "ninja")
     add_includedirs("include/PCSC")
-    on_install(function (package)
+    on_install("linux", "bsd", "cross", function (package)
         io.replace("meson.build", "executable%s*%b()", "")
         io.replace("meson.build", "library%('pcscspy'.-%)", "")
+        io.replace("meson.build", "run_command%('pod2man'.-%)", "")
+        io.replace("meson.build", [[gen_flex = generator(find_program('flex'),
+  output : '@BASENAME@.c',
+  arguments : ['-o', '@OUTPUT@', '--prefix=@BASENAME@', '@INPUT@'])]], "")
+        io.replace("meson.build", [[gen_src = gen_flex.process('src/configfile.l', 'src/tokenparser.l')
+pcscd_src += gen_src]], "")
         io.replace("meson.build", "doxygen.found()", "false", {plain = true})
 
         local configs = {
