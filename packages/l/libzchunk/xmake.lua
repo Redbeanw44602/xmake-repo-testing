@@ -32,6 +32,7 @@ package("libzchunk")
         table.insert(configs, "-Dwith-openssl=" .. (package:config("with_openssl") and "enabled" or "disabled"))
 
         io.replace("meson.build", "subdir('src')", "subdir('src/lib')", {plain = true})
+        io.replace("meson.build", "not argplib.found()", "false", {plain = true})
 
         import("package.tools.meson").install(package, configs)
     end)
