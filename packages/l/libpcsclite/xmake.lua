@@ -1,5 +1,5 @@
 package("libpcsclite")
-    set_homepage("https://github.com/LudovicRousseau/PCSC")
+    set_homepage("https://pcsclite.apdu.fr/")
     set_description("Middleware to access a smart card using SCard API (PC/SC).")
 
     add_urls("https://github.com/LudovicRousseau/PCSC/archive/refs/tags/$(version).tar.gz",
@@ -18,9 +18,11 @@ package("libpcsclite")
 
         local configs = {
             '-Dlibsystemd=false',
+            '-Dlibudev=false',
             '-Dpolkit=false'
         }
         table.insert(configs, "-Ddefault_library=" .. (package:config("shared") and "shared" or "static"))
+        table.insert(configs, "-Dembedded=" .. (package:config("embedded") and "true" or "false"))
 
         import("package.tools.meson").install(package, configs)
     end)
