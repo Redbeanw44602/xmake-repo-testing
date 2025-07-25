@@ -15,13 +15,13 @@ package("libpcsclite")
         io.replace("meson.build", "executable%s*%b()", "")
         io.replace("meson.build", "library%('pcscspy'.-%)", "")
         io.replace("meson.build", "run_command%('pod2man'.-%)", "")
-        io.replace("meson.build", [[  install_data('pcsc-spy.1',
-    install_dir : join_paths(get_option('mandir'), 'man1'))]], "")
+        io.replace("meson.build", [[install_data('pcsc-spy.1',
+    install_dir : join_paths(get_option('mandir'), 'man1'))]], "", {plain = true})
         io.replace("meson.build", [[gen_flex = generator(find_program('flex'),
   output : '@BASENAME@.c',
-  arguments : ['-o', '@OUTPUT@', '--prefix=@BASENAME@', '@INPUT@'])]], "")
+  arguments : ['-o', '@OUTPUT@', '--prefix=@BASENAME@', '@INPUT@'])]], "", {plain = true})
         io.replace("meson.build", [[gen_src = gen_flex.process('src/configfile.l', 'src/tokenparser.l')
-pcscd_src += gen_src]], "")
+pcscd_src += gen_src]], "", {plain = true})
         io.replace("meson.build", "doxygen.found()", "false", {plain = true})
 
         local configs = {
