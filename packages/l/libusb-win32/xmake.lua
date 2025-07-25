@@ -30,6 +30,7 @@ package("libusb-win32")
                     "src/usbi.h"
                 )
                 -- add_files("src/resource.rc")
+                add_syslinks("advapi32", "gdi32", "setupapi", "user32")
                 add_files("libusb0.def")
                 add_defines("LOG_APPNAME=\"libusb-dll\"")
                 add_includedirs(
