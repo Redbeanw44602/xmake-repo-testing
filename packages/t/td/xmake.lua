@@ -50,8 +50,6 @@ package("td")
         io.replace("tdactor/CMakeLists.txt", "add_executable%(example.-%)", "")
         io.replace("tdactor/CMakeLists.txt", "target_link_libraries%(example.-%)", "")
 
-        local cmake = assert(find_tool("cmake"), "cmake not found!")
-        os.vrunv(cmake.program, {"prepare_cross_compiling"}, {envs = opt.envs or buildenvs(package, opt)})
         import("package.tools.cmake").install(package, configs)
 
         install_header("td/mtproto", "td/mtproto")
