@@ -25,11 +25,6 @@ package("td")
     end)
 
     on_install(function (package)
-        function install_header(from_dir, to_dir)
-            os.cp(from_dir .. "/**.h", package:installdir("include/" .. to_dir), {rootdir = from_dir})
-            os.cp(from_dir .. "/**.hpp", package:installdir("include/" .. to_dir), {rootdir = from_dir})
-        end
-
         local configs = {
             "-DBUILD_TESTING=OFF"
         }
@@ -51,15 +46,6 @@ package("td")
         io.replace("tdactor/CMakeLists.txt", "target_link_libraries%(example.-%)", "")
 
         import("package.tools.cmake").install(package, configs)
-
-        install_header("td/mtproto", "td/mtproto")
-        install_header("td/telegram", "td/telegram")
-        install_header("tdnet/td/net", "td/net")
-        install_header("tddb/td/db", "td/db")
-        install_header("tdactor/td/actor", "td/actor")
-        install_header("tde2e/td/e2e", "td/e2e")
-        install_header("tdutils/td/utils", "td/utils")
-        os.rmdir(package:installdir("include/td/db/binlog"))
     end)
 
     on_test(function (package)
