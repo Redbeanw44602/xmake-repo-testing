@@ -18,10 +18,12 @@ package("td")
     end
 
     on_load(function(package)
-        package:add("links", "tdjson_static", "tdjson_private", "tdclient", "tdcore", "tdcore_part1", "tdcore_part2", "tdmtproto", "tdapi", "tddb", "tdsqlite", "tdnet", "tdactor", "tde2e", "tdutils")
+        package:add("links", "tdjson", "tdjson_static", "tdjson_private", "tdclient", "tdcore", "tdcore_part1", "tdcore_part2", "tdmtproto", "tdapi", "tddb", "tdsqlite", "tdnet", "tdactor", "tde2e", "tdutils")
     end)
 
     on_install(function (package)
+        import("package.tools.cmake")
+
         function install_header(from_dir, to_dir)
             os.cp(from_dir .. "/**.h", package:installdir("include/" .. to_dir), {rootdir = from_dir})
             os.cp(from_dir .. "/**.hpp", package:installdir("include/" .. to_dir), {rootdir = from_dir})
@@ -47,7 +49,8 @@ package("td")
         io.replace("tdactor/CMakeLists.txt", "add_executable%(example.-%)", "")
         io.replace("tdactor/CMakeLists.txt", "target_link_libraries%(example.-%)", "")
 
-        import("package.tools.cmake").install(package, configs)
+        cmake.build(package, configs, {target = 'prepare_cross_compiling'})
+        cmake.install(package, configs)
 
         install_header("td/mtproto", "td/mtproto")
         install_header("td/telegram", "td/telegram")
