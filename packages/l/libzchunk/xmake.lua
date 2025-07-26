@@ -60,7 +60,7 @@ package("libzchunk")
         if is_plat("windows") and not package:config("shared") then
             -- fix lib name
             os.cd(package:installdir("lib"))
-            os.mv("libzck.a", "zck.lib")
+            os.trymv("libzck.a", "zck.lib")
         end
     end)
 
