@@ -27,6 +27,8 @@ package("gperf")
     end)
 
     on_install("@macosx", "@linux", "@bsd", "@msys", function (package)
+        io.replace("lib/getline.cc", "register", "", {plain = true})
+        io.replace("lib/getopt.h", "#ifdef __GNU_LIBRARY__", "#if 1", {plain = true})
         io.replace("lib/getopt.c", "register", "", {plain = true})
         io.replace("lib/getopt.c", "extern char *getenv ();", "#include <stdlib.h>", {plain = true})
         io.replace("lib/getopt.c", "extern int strncmp ();", "#include <string.h>", {plain = true})
