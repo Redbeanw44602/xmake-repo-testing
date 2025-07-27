@@ -17,6 +17,7 @@ package("gperf")
 
     on_install("@windows", function (package)
         os.cp("src/config.h.in", "src/config.h")
+        os.cp("lib/config.h.in", "lib/config.h")
         io.writefile("xmake.lua", [[
             add_rules("mode.debug", "mode.release")
             target("gperf")
