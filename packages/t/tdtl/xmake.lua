@@ -47,7 +47,7 @@ package("tdtl")
         io.replace("td/generate/CMakeLists.txt", "COMMAND", "COMMENT", {plain = true})
 
         if is_plat("mingw", "msys") then
-            package:add("defines", "__GNU_LIBRARY__")
+            io.replace("td/generate/tl-parser/wgetopt.h", "#ifdef __GNU_LIBRARY__", "#if 1", {plain = true})
         end
 
         import("package.tools.cmake").build(package, {}, {target = targets, builddir = "build"})
