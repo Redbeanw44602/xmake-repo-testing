@@ -28,6 +28,8 @@ package("gperf")
     on_install("@macosx", "@linux", "@bsd", "@msys", function (package)
         io.replace("lib/getline.cc", "register", "", {plain = true})
         io.replace("lib/getopt.c", "register", "", {plain = true})
+        io.replace("lib/getopt.c", "extern char *getenv ();", "", {plain = true})
+        io.replace("lib/getopt.c", "extern int strncmp ();", "", {plain = true})
         import("package.tools.autoconf").install(package)
     end)
 
