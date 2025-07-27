@@ -35,7 +35,7 @@ package("tdtl")
     }
 
     add_deps("cmake")
-    add_deps("gperf")
+    add_deps("gperf", {public = true})
     on_install(function (package)
         local targets = {}
         for _, tool in ipairs(tools) do
@@ -46,7 +46,7 @@ package("tdtl")
         io.replace("td/generate/CMakeLists.txt", "${TDMIME_AUTO}\n", "", {plain = true})
         io.replace("td/generate/CMakeLists.txt", "COMMAND", "COMMENT", {plain = true})
 
-        import("package.tools.cmake").build(package, {}, {targets = targets, builddir = "build"})
+        import("package.tools.cmake").build(package, {}, {target = targets, builddir = "build"})
 
         os.cd("build")
         for _, tool in ipairs(tools) do
