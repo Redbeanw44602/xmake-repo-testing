@@ -28,27 +28,13 @@ package("td")
     end)
 
     on_install(function (package)
-        local configs = {
-            "-DBUILD_TESTING=OFF"
-        }
+        local configs = {}
         table.insert(configs, "-DCMAKE_BUILD_TYPE=" .. (package:debug() and "Debug" or "Release"))
         table.insert(configs, "-DTD_INSTALL_STATIC_LIBRARIES=" .. (package:config("shared") and "OFF" or "ON"))
         table.insert(configs, "-DTD_INSTALL_SHARED_LIBRARIES=" .. (package:config("shared") and "ON" or "OFF"))
         table.insert(configs, "-DTD_ENABLE_LTO=" .. (package:config("lto") and "ON" or "OFF"))
 
-        io.replace("CMakeLists.txt", "add_subdirectory(benchmark)", "", {plain = true})
-        io.replace("CMakeLists.txt", "# EXECUTABLES\nif (EMSCRIPTEN)", "if (0)", {plain = true})
-        io.replace("CMakeLists.txt", "if (NOT CMAKE_CROSSCOMPILING)\n  add_executable(tg_cli", "if (0)\n#", {plain = true})
-        io.replace("tdutils/CMakeLists.txt", "TD_TEST_FOLLY AND ABSL_FOUND AND TDUTILS_USE_EXTERNAL_DEPENDENCIES", "0", {plain = true})
-        io.replace("tddb/CMakeLists.txt", "add_executable%(binlog_dump.-%)", "")
-        io.replace("tddb/CMakeLists.txt", "target_link_libraries%(binlog_dump.-%)", "")
-        io.replace("tde2e/CMakeLists.txt", "add_executable%(test%-e2e.-%)", "")
-        io.replace("tde2e/CMakeLists.txt", "target_link_libraries%(test%-e2e.-%)", "")
-        io.replace("tde2e/CMakeLists.txt", "target_include_directories%(test%-e2e.-%)", "")
-        io.replace("tdactor/CMakeLists.txt", "add_executable%(example.-%)", "")
-        io.replace("tdactor/CMakeLists.txt", "target_link_libraries%(example.-%)", "")
-
-        import("package.tools.cmake").install(package, configs)
+        import("package.tools.cmake").install(package, configs, {target = package:config("shared") and "tdjson" or "tdjson_static"})
     end)
 
     on_test(function (package)
