@@ -46,6 +46,10 @@ package("tdtl")
         io.replace("td/generate/CMakeLists.txt", "${TDMIME_AUTO}\n", "", {plain = true})
         io.replace("td/generate/CMakeLists.txt", "COMMAND", "COMMENT", {plain = true})
 
+        if is_plat("mingw", "msys") then
+            package:add("defines", "__GNU_LIBRARY__")
+        end
+
         import("package.tools.cmake").build(package, {}, {target = targets, builddir = "build"})
 
         os.cd("build")
