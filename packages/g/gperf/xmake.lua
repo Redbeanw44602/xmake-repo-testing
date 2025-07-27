@@ -19,6 +19,8 @@ package("gperf")
         os.cp("src/config.h.in", "src/config.h")
         if package:version():ge("3.3") then
             os.cp("lib/config.h.in", "lib/config.h")
+            os.cp("lib/getopt.in.h", "lib/getopt.h")
+            os.cp("lib/getopt-cdefs.in.h", "lib/getopt-cdefs.h")
             io.replace("lib/config.h", "if HAVE_STDBOOL_H", "if 1")
             io.replace("lib/config.h", "#   include <stdbool.h>", "typedef int bool;\n#define false 0\n#define true 1")
             io.replace("lib/config.h", "#undef GNULIB_XALLOC_DIE", "#define GNULIB_XALLOC_DIE")
