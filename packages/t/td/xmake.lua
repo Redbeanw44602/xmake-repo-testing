@@ -26,7 +26,7 @@ package("td")
             package:add("defines", "TDJSON_STATIC_DEFINE")
         end
         if package:is_cross() then
-            package:add("deps", "tdtl $(version)")
+            package:add("deps", "tdtl " .. package:version_str())
         end
     end)
 
