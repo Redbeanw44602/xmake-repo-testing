@@ -30,7 +30,7 @@ package("gperf")
         io.replace("lib/getopt.c", "register", "", {plain = true})
         io.replace("lib/getopt.c", "extern char *getenv ();", "#include <stdlib.h>", {plain = true})
         io.replace("lib/getopt.c", "extern int strncmp ();", "#include <string.h>", {plain = true})
-        io.replace("lib/getopt.h", "__GNU_LIBRARY__", "1", {plain = true})
+        io.replace("lib/getopt.h", "#ifdef __GNU_LIBRARY__", "#if 1", {plain = true})
         import("package.tools.autoconf").install(package)
     end)
 
