@@ -48,7 +48,7 @@ package("tdtl")
 
         if is_plat("mingw", "msys") then
             io.replace("td/generate/tl-parser/wgetopt.h", "#ifdef __GNU_LIBRARY__", "#if 1", {plain = true})
-            io.replace("td/generate/tl-parser/wgetopt.c", "extern char *getenv();", "", {plain = true})
+            io.replace("td/generate/tl-parser/wgetopt.c", "extern char *getenv();", "#include <stdlib.h>", {plain = true})
         end
 
         import("package.tools.cmake").build(package, {}, {target = targets, builddir = "build"})
