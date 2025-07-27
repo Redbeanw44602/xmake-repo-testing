@@ -14,7 +14,10 @@ package("td")
         add_syslinks("pthread", "dl")
     end
     if is_plat("windows", "mingw", "msys", "cygwin") then
-        add_syslinks("ws2_32", "mswsock", "crypt32")
+        add_syslinks("ws2_32", "mswsock", "crypt32", "normaliz", "psapi")
+    end
+    if is_plat("android") then
+        add_syslinks("log")
     end
 
     on_load(function(package)
