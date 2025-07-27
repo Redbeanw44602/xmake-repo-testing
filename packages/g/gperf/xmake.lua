@@ -18,6 +18,8 @@ package("gperf")
     on_install("@windows", function (package)
         os.cp("src/config.h.in", "src/config.h")
         os.cp("lib/config.h.in", "lib/config.h")
+        io.replace("lib/config.h", "if HAVE_STDBOOL_H", "if 1")
+        io.replace("lib/config.h", "#   include <stdbool.h>", "typedef int bool;\n#define false 0\n#define true 1")
         io.writefile("xmake.lua", [[
             add_rules("mode.debug", "mode.release")
             target("gperf")
