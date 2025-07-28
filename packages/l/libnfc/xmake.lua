@@ -8,6 +8,8 @@ package("libnfc")
     add_versions("tarball:1.8.0", "0ab7d9b41442e7edc2af7c54630396edc73ce51128aa28a5c6e4135dc5595495")
     add_versions("git:1.8.0", "libnfc-1.8.0")
 
+    add_configs("shared", {description = "Build shared library.", default = false, type = "boolean", readonly = true})
+
     add_configs("logging",      {description = "Enable log facility. (errors, warning, info and debug messages)", default = true, type = "boolean"})
     add_configs("envvars",      {description = "Enable envvars facility.", default = true, type = "boolean"})
     add_configs("configurable", {description = "Enable configuration files.", default = true, type = "boolean"})
@@ -102,7 +104,8 @@ package("libnfc")
         end
         io.replace("contrib/win32/stdlib.c", "char *str[32];", "char str[32];", {plain = true})
         io.replace("cmake/modules/FindLIBUSB.cmake", "PKG_CHECK_MODULES(LIBUSB REQUIRED libusb)", "PKG_CHECK_MODULES(LIBUSB REQUIRED libusb-compat)", {plain = true})
-        io.replace("CMakeLists.txt", [[CMAKE_SYSTEM_PROCESSOR STREQUAL "x86"]], [[CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86|i[3-6]86)$"]])
+        io.replace("CMakeLists.txt", [[CMAKE_SYSTEM_PROCESSOR STREQUAL "x86"]], [[CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86|i[3-6]86)$"]], {plain = true})
+        io.replace("libnfc/CMakeLists.txt", [[LIST(APPEND WINDOWS_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/../windows/libnfc.rc)]], "", {plain = true})
 
         io.replace("CMakeLists.txt", "INCLUDE(UseDoxygen)", "", {plain = true})
         import("package.tools.cmake").install(package, configs, opts)
