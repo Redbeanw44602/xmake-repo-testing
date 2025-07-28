@@ -98,7 +98,7 @@ package("libnfc")
         if package:is_plat("windows", "mingw", "msys", "cygwin") then
             opts.cflags = [[-DSYSCONFDIR="./config"]]
         end
-        io.replace("contrib/win32/stdlib.c", "char *str[32];", "char str[32];")
+        io.replace("contrib/win32/stdlib.c", "char *str[32];", "char str[32];", {plain = true})
         io.replace("cmake/modules/FindLIBUSB.cmake", "PKG_CHECK_MODULES(LIBUSB REQUIRED libusb)", "PKG_CHECK_MODULES(LIBUSB REQUIRED libusb-compat)", {plain = true})
         io.replace("CMakeLists.txt", [[CMAKE_SYSTEM_PROCESSOR STREQUAL "x86"]], [[CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86|i[3-6]86)$"]])
 
