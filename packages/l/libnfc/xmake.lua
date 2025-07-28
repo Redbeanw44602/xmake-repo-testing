@@ -95,13 +95,14 @@ package("libnfc")
             local dlltool = assert(os.files(path.join(mingw.bindir, "*dlltool*"))[1], "dlltool not found!")
             table.insert(configs, "-DDLLTOOL=" .. dlltool)
         end
+        local opts = {}
         if package:is_plat("macosx") then --- ???
-            opt.shflags = {"-framework", "CoreFoundation", "-framework", "IOKit", "-framework", "Security"}
+            opts.shflags = {"-framework", "CoreFoundation", "-framework", "IOKit", "-framework", "Security"}
         end
         io.replace("cmake/modules/FindLIBUSB.cmake", "PKG_CHECK_MODULES(LIBUSB REQUIRED libusb)", "PKG_CHECK_MODULES(LIBUSB REQUIRED libusb-compat)", {plain = true})
 
         io.replace("CMakeLists.txt", "INCLUDE(UseDoxygen)", "", {plain = true})
-        import("package.tools.cmake").install(package, configs)
+        import("package.tools.cmake").install(package, configs, opts)
     end)
 
     on_test(function (package)
