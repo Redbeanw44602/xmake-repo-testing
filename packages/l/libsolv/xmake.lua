@@ -69,70 +69,55 @@ package("libsolv")
         add_deps("pkgconf")
     end
     on_load(function (package)
-        local apk_enabled = package:config("apk")
-        local archrepo_enabled = package:config("archrepo")
-        local debian_enabled = package:config("debian")
-        local rpm5_enabled = package:config("rpm5")
-        local rpmmd_enabled = package:config("rpmmd")
-        local suserepo_enabled = package:config("suserepo")
-        local helixrepo_enabled = package:config("helixrepo")
-        local mdkrepo_enabled = package:config("mdkrepo")
-        local appdata_enabled = package:config("appdata")
-        local comps_enabled = package:config("comps")
-        local lzma_compression_enabled = package:config("lzma_compression")
-        local zstd_compression_enabled = package:config("zstd_compression")
-        local with_system_zchunk = package:config("with_system_zchunk")
-        local zchunk_compression_enabled = package:config("zchunk_compression")
         local libxml2_or_expat_enabled = false
 
         if package:config("ARCHLINUX") then
-            archrepo_enabled = true
+            package:config_set("archrepo", true)
         end
         if package:config("MANDRIVA") then
-            mdkrepo_enabled = true
+            package:config_set("mdkrepo", true)
         end
         if package:config("MAGEIA") then
-            mdkrepo_enabled = true
-            lzma_compression_enabled = true
+            package:config_set("mdkrepo", true)
+            package:config_set("lzma_compression", true)
         end
         if package:config("DEBIAN") then
-            debian_enabled = true
+            package:config_set("debian", true)
         end
         if package:config("SUSE") then
-            suserepo_enabled = true
-            helixrepo_enabled = true
+            package:config_set("suserepo", true)
+            package:config_set("helixrepo", true)
         end
 
-        if rpm5_enabled then
-            rpmmd_enabled = true
+        if package:config("rpm5") then
+            package:config_set("rpmmd", true)
         end
-        if archrepo_enabled or debian_enabled then
-            lzma_compression_enabled = true
+        if package:config("archrepo") or package:config("debian") then
+            package:config_set("lzma_compression", true)
         end
-        if apk_enabled then
-            zstd_compression_enabled = true
+        if package:config("apk") then
+            package:config_set("zstd_compression", true)
         end
-        if rpmmd_enabled or suserepo_enabled or appdata_enabled or comps_enabled or helixrepo_enabled or mdkrepo_enabled then
+        if package:config("rpmmd") or package:config("suserepo") or package:config("appdata") or package:config("comps") or package:config("helixrepo") or mdkrepo_enabled then
             libxml2_or_expat_enabled = true
         end
-        if with_system_zchunk then
-            zchunk_compression_enabled = true
+        if package:config("with_system_zchunk") then
+            package:config_set("zchunk_compression", true)
         end
 
         package:add("deps", "zlib")
-        if lzma_compression_enabled then
+        if package:config("lzma_compression") then
             package:add("deps", "xz")
         end
         if package:config("bzip2_compression") then
             package:add("deps", "bzip2")
         end
-        if zstd_compression_enabled then
+        if package:config("zstd_compression") then
             package:add("deps", "zstd")
         end
-        -- TODO: xrepo missing deps.
-        -- if zchunk_compression_enabled then
-        --     package:add("deps", "zchunk", {system = with_system_zchunk})
-        -- end
+        if package:config("zchunk_compression") then
+            package:add("deps", "zchunk", {system = package:config("with_system_zchunk")})
+        end
         if libxml2_or_expat_enabled then
             if package:config("with_libxml2") then
                 package:add("deps", "libxml2")
