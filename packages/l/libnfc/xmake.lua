@@ -28,7 +28,7 @@ package("libnfc")
     if not is_plat("windows") then
         add_deps("libusb-compat")
     else
-        add_deps("libusb-win32") then
+        add_deps("libusb-win32")
     end
 
     add_deps("cmake")
