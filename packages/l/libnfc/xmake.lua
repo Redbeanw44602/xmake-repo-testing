@@ -25,13 +25,24 @@ package("libnfc")
     add_configs("pn532_uart",   {description = "Enable PN532 UART support (Use serial port)", default = true, type = "boolean"})
     add_configs("pn53x_usb",    {description = "Enable PN531 and PN531 USB support (Depends on libusb)", default = true, type = "boolean"})
 
+    if not is_plat("windows") then
+        add_deps("libusb-compat")
+    else
+        add_deps("libusb-win32") then
+    end
+
     add_deps("cmake")
-    add_deps("libusb")
     if not is_subhost("windows") then
         add_deps("pkg-config")
     end
-    -- TODO: xrepo missing deps.
-    -- add_deps("pcsc")
+    on_load(function (package)
+        if package:config("pcsc") or package:config("acr122_pcsc") then
+            if package:is_plat("linux", "bsd") then
+                package:add("deps", "libpcsclite")
+            end
+        end
+    end)
+
     on_install(function (package)
         local configs = {
             "-DBUILD_EXAMPLES=OFF"
