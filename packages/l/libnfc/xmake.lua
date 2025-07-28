@@ -40,7 +40,7 @@ package("libnfc")
         add_deps("pkgconf")
     end
     on_load(function (package)
-        if is_plat("windows", "mingw", "msys", "cygwin", "macosx") then -- dev test
+        if is_plat("windows", "mingw", "msys", "cygwin") then -- dev test
             package:config_set("pcsc", true)
             package:config_set("pcsc", true)
         end
@@ -99,8 +99,10 @@ package("libnfc")
         if package:is_plat("macosx") then --- ???
             opts.shflags = {"-framework", "CoreFoundation", "-framework", "IOKit", "-framework", "Security"}
         end
+        if package:is_plat("windows", "mingw", "msys", "cygwin") then
+            opts.cflags = [[-DSYSCONFDIR="./config"]]
+        end
         io.replace("cmake/modules/FindLIBUSB.cmake", "PKG_CHECK_MODULES(LIBUSB REQUIRED libusb)", "PKG_CHECK_MODULES(LIBUSB REQUIRED libusb-compat)", {plain = true})
-        io.replace("cmake/config_windows.h.cmake", [[LIBNFC_SYSCONFDIR "@LIBNFC_SYSCONFDIR@"]], [[SYSCONFDIR "@SYSCONFDIR@"]])
         io.replace("CMakeLists.txt", [[CMAKE_SYSTEM_PROCESSOR STREQUAL "x86"]], [[CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86|i[3-6]86)$"]])
 
         io.replace("CMakeLists.txt", "INCLUDE(UseDoxygen)", "", {plain = true})
