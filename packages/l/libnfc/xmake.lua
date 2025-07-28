@@ -6,9 +6,7 @@ package("libnfc")
     add_urls("https://github.com/nfc-tools/libnfc/archive/refs/tags/libnfc-$(version).tar.gz", {alias = "tarball"})
     add_urls("https://github.com/nfc-tools/libnfc.git", {alias = "git"})
     add_versions("tarball:1.8.0", "0ab7d9b41442e7edc2af7c54630396edc73ce51128aa28a5c6e4135dc5595495")
-    add_versions("tarball:1.7.1", "30de35b4f1af3f57dab40d91ffb2275664a35859ff2b014ba7b226aa3f5465f5")
     add_versions("git:1.8.0", "libnfc-1.8.0")
-    add_versions("git:1.7.1", "libnfc-1.7.1")
 
     add_configs("logging",      {description = "Enable log facility. (errors, warning, info and debug messages)", default = true, type = "boolean"})
     add_configs("envvars",      {description = "Enable envvars facility.", default = true, type = "boolean"})
@@ -45,12 +43,16 @@ package("libnfc")
                 package:add("deps", "libpcsclite")
             end
         end
+        if package:version():le("1.7.1") then
+            package:add("deps", "pcre")
+        end
     end)
 
     -- about windows:
     -- @see https://github.com/nfc-tools/libnfc/pull/734
     on_install("!iphoneos and !wasm and !windows", function (package)
         local configs = {
+            "-DBUILD_UTILS=OFF",
             "-DBUILD_EXAMPLES=OFF"
         }
         table.insert(configs, "-DCMAKE_BUILD_TYPE=" .. (package:is_debug() and "Debug" or "Release"))
