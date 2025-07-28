@@ -26,7 +26,7 @@ package("libnfc")
     add_configs("pn53x_usb",    {description = "Enable PN531 and PN531 USB support (Depends on libusb)", default = true, type = "boolean"})
 
     if not is_plat("bsd") then
-        if not is_plat("windows", "mingw", "msys", "cygwin") then
+        if not is_plat("windows") then
             add_deps("libusb-compat")
         else
             add_deps("libusb-win32")
@@ -53,7 +53,7 @@ package("libnfc")
 
     -- about windows:
     -- @see https://github.com/nfc-tools/libnfc/pull/734
-    on_install("!iphoneos and !windows", function (package)
+    on_install("!iphoneos and !wasm and !windows", function (package)
         local configs = {
             "-DBUILD_EXAMPLES=OFF"
         }
@@ -74,7 +74,7 @@ package("libnfc")
         table.insert(configs, "-DLIBNFC_DRIVER_PN53X_USB=" .. (package:config("pn53x_usb") and "ON" or "OFF"))
 
         if package:is_plat("windows", "mingw", "msys", "cygwin") then
-            local usb = package:dep("libusb-win32")
+            local usb = package:dep("libusb-compat") or package:dep("libusb-win32")
             if usb then
                 local fetchinfo = usb:fetch()
                 if fetchinfo then
