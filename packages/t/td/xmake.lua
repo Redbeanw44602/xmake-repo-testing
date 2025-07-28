@@ -8,18 +8,22 @@ package("td")
     add_urls("https://github.com/tdlib/td.git")
     add_versions("1.8.51", "bb474a201baa798784d696d2d9d762a9d2807f96")
 
+    if is_plat("wasm") then
+        add_configs("shared", {description = "Build shared library.", default = false, type = "boolean", readonly = true})
+    end
+
     add_deps("cmake")
     add_deps("openssl3", "zlib", "gperf")
-    if is_plat("linux", "android", "bsd") then
+    if is_plat("linux", "bsd") then
         add_syslinks("pthread", "dl")
     end
+    if is_plat("android") then
+        add_syslinks("dl", "log")
+    end
+
     if is_plat("windows", "mingw", "msys", "cygwin") then
         add_syslinks("ws2_32", "mswsock", "crypt32", "normaliz", "psapi")
     end
-    if is_plat("android") then
-        add_syslinks("log")
-    end
-
     on_load(function(package)
         package:add("links", "tdjson", "tdjson_static", "tdjson_private", "tdclient", "tdcore", "tdcore_part1", "tdcore_part2", "tdmtproto", "tdapi", "tddb", "tdsqlite", "tdnet", "tdactor", "tde2e", "tdutils")
         if not package:config("shared") then
@@ -63,6 +67,10 @@ package("td")
             os.exec("gperf -m100 --output-file=auto/mime_type_to_extension.cpp auto/mime_type_to_extension.gperf")
             os.exec("gperf -m100 --output-file=auto/extension_to_mime_type.cpp auto/extension_to_mime_type.gperf")
             os.cd("../..")
+        end
+        if is_plat("mingw", "msys") then
+            io.replace("td/generate/tl-parser/wgetopt.h", "#ifdef __GNU_LIBRARY__", "#if 1", {plain = true})
+            io.replace("td/generate/tl-parser/wgetopt.c", "extern char *getenv();", "#include <stdlib.h>", {plain = true})
         end
 
         import("package.tools.cmake").install(package, configs, {target = package:config("shared") and "tdjson" or "tdjson_static"})
