@@ -70,5 +70,9 @@ package("libusb")
     end)
 
     on_test(function (package)
-        assert(package:has_cfuncs("libusb_init", {includes = "libusb-1.0/libusb.h"}))
+        assert(package:check_csnippets({test = [[
+            void test() {
+                libusb_init(0);
+            }
+        ]]}, {configs = {languages = "c99"}, includes = "libusb.h"}))
     end)
