@@ -26,7 +26,7 @@ package("libnfc")
     add_configs("pn53x_usb",    {description = "Enable PN531 and PN531 USB support (Depends on libusb)", default = true, type = "boolean"})
 
     if not is_plat("bsd") then
-        if not is_plat("windows") then
+        if not is_plat("windows", "mingw", "msys", "cygwin") then
             add_deps("libusb-compat")
         else
             add_deps("libusb-win32")
@@ -40,10 +40,6 @@ package("libnfc")
         add_deps("pkgconf")
     end
     on_load(function (package)
-        if is_plat("windows", "mingw", "msys", "cygwin") then -- dev test
-            package:config_set("pcsc", true)
-            package:config_set("pcsc", true)
-        end
         if package:config("pcsc") or package:config("acr122_pcsc") then
             if package:is_plat("linux", "bsd") then
                 package:add("deps", "libpcsclite")
@@ -74,7 +70,7 @@ package("libnfc")
         table.insert(configs, "-DLIBNFC_DRIVER_PN53X_USB=" .. (package:config("pn53x_usb") and "ON" or "OFF"))
 
         if package:is_plat("windows", "mingw", "msys", "cygwin") then
-            local usb = package:dep("libusb-compat") or package:dep("libusb-win32")
+            local usb = package:dep("libusb-win32")
             if usb then
                 local fetchinfo = usb:fetch()
                 if fetchinfo then
