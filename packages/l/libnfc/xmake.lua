@@ -26,7 +26,7 @@ package("libnfc")
     add_configs("pn53x_usb",    {description = "Enable PN531 and PN531 USB support (Depends on libusb)", default = true, type = "boolean"})
 
     if not is_plat("bsd") then
-        if not is_plat("windows") then
+        if not is_plat("windows", "mingw", "msys", "cygwin") then
             add_deps("libusb-compat")
         else
             add_deps("libusb-win32")
@@ -36,6 +36,8 @@ package("libnfc")
     add_deps("cmake")
     if not is_subhost("windows") then
         add_deps("pkg-config")
+    else
+        add_deps("pkgconf")
     end
     on_load(function (package)
         if is_plat("windows", "mingw", "msys", "cygwin", "macosx") then -- dev test
@@ -49,7 +51,9 @@ package("libnfc")
         end
     end)
 
-    on_install(function (package)
+    -- about windows:
+    -- @see https://github.com/nfc-tools/libnfc/pull/734
+    on_install("!iphoneos and !windows", function (package)
         local configs = {
             "-DBUILD_EXAMPLES=OFF"
         }
@@ -69,7 +73,7 @@ package("libnfc")
         table.insert(configs, "-DLIBNFC_DRIVER_PN532_UART=" .. (package:config("pn532_uart") and "ON" or "OFF"))
         table.insert(configs, "-DLIBNFC_DRIVER_PN53X_USB=" .. (package:config("pn53x_usb") and "ON" or "OFF"))
 
-        if package:is_plat("windows") then
+        if package:is_plat("windows", "mingw", "msys", "cygwin") then
             local usb = package:dep("libusb-win32")
             if usb then
                 local fetchinfo = usb:fetch()
@@ -90,6 +94,9 @@ package("libnfc")
             local mingw = import("detect.sdks.find_mingw")()
             local dlltool = assert(os.files(path.join(mingw.bindir, "*dlltool*"))[1], "dlltool not found!")
             table.insert(configs, "-DDLLTOOL=" .. dlltool)
+        end
+        if package:is_plat("macosx") then --- ???
+            opt.shflags = {"-framework", "CoreFoundation", "-framework", "IOKit", "-framework", "Security"}
         end
         io.replace("cmake/modules/FindLIBUSB.cmake", "PKG_CHECK_MODULES(LIBUSB REQUIRED libusb)", "PKG_CHECK_MODULES(LIBUSB REQUIRED libusb-compat)", {plain = true})
 
