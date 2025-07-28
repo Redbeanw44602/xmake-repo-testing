@@ -15,8 +15,9 @@ package("libnfc")
     add_configs("configurable", {description = "Enable configuration files.", default = true, type = "boolean"})
 
     -- drivers
-    add_configs("pcsc",         {description = "Enable PC/SC reader support (Depends on PC/SC)", default = false, type = "boolean"})
-    add_configs("acr122_pcsc",  {description = "Enable ACR122 support (Depends on PC/SC)", default = false, type = "boolean"})
+    local dev = true
+    add_configs("pcsc",         {description = "Enable PC/SC reader support (Depends on PC/SC)", default = dev, type = "boolean"})
+    add_configs("acr122_pcsc",  {description = "Enable ACR122 support (Depends on PC/SC)", default = dev, type = "boolean"})
     add_configs("acr122_usb",   {description = "Enable ACR122 support (Direct USB connection)", default = true, type = "boolean"})
     add_configs("acr122s",      {description = "Enable ACR122S support (Use serial port)", default = true, type = "boolean"})
     add_configs("arygon",       {description = "Enable ARYGON support (Use serial port)", default = true, type = "boolean"})
@@ -25,10 +26,12 @@ package("libnfc")
     add_configs("pn532_uart",   {description = "Enable PN532 UART support (Use serial port)", default = true, type = "boolean"})
     add_configs("pn53x_usb",    {description = "Enable PN531 and PN531 USB support (Depends on libusb)", default = true, type = "boolean"})
 
-    if not is_plat("windows") then
-        add_deps("libusb-compat")
-    else
-        add_deps("libusb-win32")
+    if not is_plat("bsd") then
+        if not is_plat("windows") then
+            add_deps("libusb-compat")
+        else
+            add_deps("libusb-win32")
+        end
     end
 
     add_deps("cmake")
@@ -62,6 +65,25 @@ package("libnfc")
         table.insert(configs, "-DLIBNFC_DRIVER_PN532_SPI=" .. (package:config("pn532_spi") and "ON" or "OFF"))
         table.insert(configs, "-DLIBNFC_DRIVER_PN532_UART=" .. (package:config("pn532_uart") and "ON" or "OFF"))
         table.insert(configs, "-DLIBNFC_DRIVER_PN53X_USB=" .. (package:config("pn53x_usb") and "ON" or "OFF"))
+
+        if package:is_plat("windows") then
+            local usb = package:dep("libusb-win32")
+            if usb then
+                local fetchinfo = usb:fetch()
+                if fetchinfo then
+                    local includedirs = table.wrap(fetchinfo.includedirs or fetchinfo.sysincludedirs)
+                    if #includedirs > 0 then
+                        table.insert(configs, "-DLIBUSB_INCLUDE_DIRS=" .. table.concat(includedirs, ";"))
+                    end
+                    local libfiles = table.wrap(fetchinfo.libfiles)
+                    if #libfiles > 0 then
+                        table.insert(configs, "-DLIBUSB_LIBRARIES=" .. libfiles[1])
+                    end
+                end
+            end
+        end
+
+        io.replace("cmake/modules/FindLIBUSB.cmake", "PKG_CHECK_MODULES(LIBUSB REQUIRED libusb)", "PKG_CHECK_MODULES(LIBUSB REQUIRED libusb-compat)", {plain = true})
 
         io.replace("CMakeLists.txt", "INCLUDE(UseDoxygen)", "", {plain = true})
         import("package.tools.cmake").install(package, configs)
