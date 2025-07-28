@@ -15,9 +15,8 @@ package("libnfc")
     add_configs("configurable", {description = "Enable configuration files.", default = true, type = "boolean"})
 
     -- drivers
-    local dev = true
-    add_configs("pcsc",         {description = "Enable PC/SC reader support (Depends on PC/SC)", default = dev, type = "boolean"})
-    add_configs("acr122_pcsc",  {description = "Enable ACR122 support (Depends on PC/SC)", default = dev, type = "boolean"})
+    add_configs("pcsc",         {description = "Enable PC/SC reader support (Depends on PC/SC)", default = false, type = "boolean"})
+    add_configs("acr122_pcsc",  {description = "Enable ACR122 support (Depends on PC/SC)", default = false, type = "boolean"})
     add_configs("acr122_usb",   {description = "Enable ACR122 support (Direct USB connection)", default = true, type = "boolean"})
     add_configs("acr122s",      {description = "Enable ACR122S support (Use serial port)", default = true, type = "boolean"})
     add_configs("arygon",       {description = "Enable ARYGON support (Use serial port)", default = true, type = "boolean"})
@@ -39,6 +38,10 @@ package("libnfc")
         add_deps("pkg-config")
     end
     on_load(function (package)
+        if is_plat("windows", "mingw", "msys", "cygwin", "macosx") then -- dev test
+            package:config_set("pcsc", true)
+            package:config_set("pcsc", true)
+        end
         if package:config("pcsc") or package:config("acr122_pcsc") then
             if package:is_plat("linux", "bsd") then
                 package:add("deps", "libpcsclite")
@@ -81,8 +84,13 @@ package("libnfc")
                     end
                 end
             end
+            io.replace("cmake/modules/FindPCSC.cmake", "FIND_LIBRARY(PCSC_LIBRARIES NAMES PCSC libwinscard)", "FIND_LIBRARY(PCSC_LIBRARIES NAMES PCSC winscard)", {plain = true})
         end
-
+        if package:is_plat("mingw") then
+            local mingw = import("detect.sdks.find_mingw")()
+            local dlltool = assert(os.files(path.join(mingw.bindir, "*dlltool*"))[1], "dlltool not found!")
+            table.insert(configs, "-DDLLTOOL=" .. dlltool)
+        end
         io.replace("cmake/modules/FindLIBUSB.cmake", "PKG_CHECK_MODULES(LIBUSB REQUIRED libusb)", "PKG_CHECK_MODULES(LIBUSB REQUIRED libusb-compat)", {plain = true})
 
         io.replace("CMakeLists.txt", "INCLUDE(UseDoxygen)", "", {plain = true})
