@@ -5,7 +5,9 @@ package("libnfc")
 
     add_urls("https://github.com/nfc-tools/libnfc/archive/refs/tags/libnfc-$(version).tar.gz", {alias = "tarball"})
     add_urls("https://github.com/nfc-tools/libnfc.git", {alias = "git"})
+    add_versions("tarball:1.8.0", "0ab7d9b41442e7edc2af7c54630396edc73ce51128aa28a5c6e4135dc5595495")
     add_versions("tarball:1.7.1", "30de35b4f1af3f57dab40d91ffb2275664a35859ff2b014ba7b226aa3f5465f5")
+    add_versions("git:1.8.0", "libnfc-1.8.0")
     add_versions("git:1.7.1", "libnfc-1.7.1")
 
     add_configs("shared", {description = "Build shared library.", default = false, type = "boolean", readonly = true})
