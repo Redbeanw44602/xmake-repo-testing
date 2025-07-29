@@ -8,7 +8,7 @@ package("libusb-compat")
 
     add_versions("v0.1.8", "73f8023b91a4359781c6f1046ae84156e06816aa5c2916ebd76f353d41e0c685")
 
-    add_deps("libusb")
+    add_deps("libusb", {public = true})
 
     on_load("wasm", function (package)
         package:add("defines", "PATH_MAX=4096")
