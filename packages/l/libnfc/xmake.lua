@@ -40,6 +40,11 @@ package("libnfc")
     else
         add_deps("pkgconf")
     end
+
+    on_check("!linux", function (package)
+        assert(not package:config("pn532_i2c") and not package:config("pn532_spi"), "package(libnfc): I2C/SPI is only (yet) supported in Linux!")
+    end)
+
     on_load(function (package)
         if package:config("pcsc") or package:config("acr122_pcsc") then
             if package:is_plat("linux", "bsd") then
@@ -92,9 +97,7 @@ package("libnfc")
             io.replace("cmake/modules/FindPCSC.cmake", "FIND_LIBRARY(PCSC_LIBRARIES NAMES PCSC libwinscard)", "FIND_LIBRARY(PCSC_LIBRARIES NAMES PCSC winscard)", {plain = true})
         end
         if package:is_plat("mingw") then
-            local mingw = import("detect.sdks.find_mingw")()
-            local dlltool = assert(os.files(path.join(mingw.bindir, "*dlltool*"))[1], "dlltool not found!")
-            table.insert(configs, "-DDLLTOOL=" .. dlltool)
+            table.insert(configs, "-DDLLTOOL=" .. package:tool("dlltool"))
         end
         local opts = {}
         if package:is_plat("macosx") then
