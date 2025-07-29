@@ -53,12 +53,16 @@ package("libnfc")
                 package:add("deps", "libpcsclite")
             end
         end
+        if package:version():le("1.7.1") then
+            package:add("deps", "pcre")
+        end
     end)
 
     -- about windows:
     -- @see https://github.com/nfc-tools/libnfc/pull/734
     on_install("!iphoneos and !wasm and !windows", function (package)
         local configs = {
+            "-DBUILD_UTILS=OFF",
             "-DBUILD_EXAMPLES=OFF"
         }
         table.insert(configs, "-DCMAKE_BUILD_TYPE=" .. (package:is_debug() and "Debug" or "Release"))
