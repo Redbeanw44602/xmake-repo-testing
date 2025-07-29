@@ -30,6 +30,7 @@ package("libnfc")
             add_deps("libusb-compat")
         else
             add_deps("libusb-win32")
+            add_syslinks("wsock32")
         end
     end
 
@@ -96,16 +97,17 @@ package("libnfc")
             table.insert(configs, "-DDLLTOOL=" .. dlltool)
         end
         local opts = {}
-        if package:is_plat("macosx") then --- ???
+        if package:is_plat("macosx") then
             opts.shflags = {"-framework", "CoreFoundation", "-framework", "IOKit", "-framework", "Security"}
         end
         if package:is_plat("windows", "mingw", "msys", "cygwin") then
             opts.cflags = [[-DSYSCONFDIR="./config"]]
         end
-        io.replace("contrib/win32/stdlib.c", "char *str[32];", "char str[32];", {plain = true})
-        io.replace("cmake/modules/FindLIBUSB.cmake", "PKG_CHECK_MODULES(LIBUSB REQUIRED libusb)", "PKG_CHECK_MODULES(LIBUSB REQUIRED libusb-compat)", {plain = true})
         io.replace("CMakeLists.txt", [[CMAKE_SYSTEM_PROCESSOR STREQUAL "x86"]], [[CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86|i[3-6]86)$"]], {plain = true})
         io.replace("libnfc/CMakeLists.txt", [[LIST(APPEND WINDOWS_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/../windows/libnfc.rc)]], "", {plain = true})
+        io.replace("libnfc/CMakeLists.txt", "DESTINATION bin", "DESTINATION ${CMAKE_INSTALL_LIBDIR}", {plain = true})
+        io.replace("cmake/modules/FindLIBUSB.cmake", "PKG_CHECK_MODULES(LIBUSB REQUIRED libusb)", "PKG_CHECK_MODULES(LIBUSB REQUIRED libusb-compat)", {plain = true})
+        io.replace("contrib/win32/stdlib.c", "char *str[32];", "char str[32];", {plain = true})
 
         io.replace("CMakeLists.txt", "INCLUDE(UseDoxygen)", "", {plain = true})
         import("package.tools.cmake").install(package, configs, opts)
