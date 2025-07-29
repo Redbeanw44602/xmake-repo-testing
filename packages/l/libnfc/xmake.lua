@@ -96,7 +96,7 @@ package("libnfc")
                     end
                 end
             end
-            io.replace("cmake/modules/FindPCSC.cmake", "FIND_LIBRARY(PCSC_LIBRARIES NAMES PCSC libwinscard)", "FIND_LIBRARY(PCSC_LIBRARIES NAMES PCSC winscard)", {plain = true})
+            -- io.replace("cmake/modules/FindPCSC.cmake", "FIND_LIBRARY(PCSC_LIBRARIES NAMES PCSC libwinscard)", "FIND_LIBRARY(PCSC_LIBRARIES NAMES PCSC winscard)", {plain = true})
         end
         if package:is_plat("mingw") then
             table.insert(configs, "-DDLLTOOL=" .. package:tool("dlltool"))
@@ -106,7 +106,7 @@ package("libnfc")
         end
         local opts = {}
         if package:is_plat("macosx") then
-            opts.shflags = {"-framework", "CoreFoundation", "-framework", "IOKit", "-framework", "Security"}
+            -- opts.shflags = {"-framework", "CoreFoundation", "-framework", "IOKit", "-framework", "Security"}
         end
         if package:is_plat("windows", "mingw", "msys", "cygwin") then
             opts.cflags = [[-DSYSCONFDIR="./config"]]
