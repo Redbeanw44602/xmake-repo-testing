@@ -108,19 +108,19 @@ package("libnfc")
         end
         if package:is_plat("windows", "mingw", "msys", "cygwin") then
             opts.cflags = [[-DSYSCONFDIR="./config"]]
-        end
-        if package:version():le("1.7.1") then
             io.replace("CMakeLists.txt", "FIND_PACKAGE(PCRE REQUIRED)", [[
                 find_package(PkgConfig REQUIRED)
                 pkg_check_modules(PCRECORE REQUIRED libpcre)
                 pkg_check_modules(PCRE REQUIRED libpcreposix)
                 add_compile_options(${PCRE_CFLAGS})
             ]], {plain = true})
+            io.replace("libnfc/CMakeLists.txt", "${PCRE_LIBRARIES}", "${PCRE_LIBRARIES} ${PCRECORE_LIBRARIES}", {plain = true})
+            io.replace("libnfc/conf.c", "#include <regex.h>", "#include <pcreposix.h>", {plain = true})
+        end
+        if package:version():le("1.7.1") then
             io.replace("CMakeLists.txt", "# version.rc for Windows\nIF(WIN32)", "IF(0)", {plain = true})
             io.replace("CMakeLists.txt", "ADD_SUBDIRECTORY(utils)", "", {plain = true})
             io.replace("CMakeLists.txt", "ADD_SUBDIRECTORY(examples)", "", {plain = true})
-            io.replace("libnfc/CMakeLists.txt", "${PCRE_LIBRARIES}", "${PCRE_LIBRARIES} ${PCRECORE_LIBRARIES}", {plain = true})
-            io.replace("libnfc/conf.c", "#include <regex.h>", "#include <pcreposix.h>", {plain = true})
         end
         io.replace("CMakeLists.txt", [[CMAKE_SYSTEM_PROCESSOR STREQUAL "x86"]], [[CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86|i[3-6]86)$"]], {plain = true})
         io.replace("libnfc/CMakeLists.txt", [[LIST(APPEND WINDOWS_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/../windows/libnfc.rc)]], "", {plain = true})
