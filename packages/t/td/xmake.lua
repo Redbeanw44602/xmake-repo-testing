@@ -88,7 +88,7 @@ package("td")
             install_header("tdactor/td/actor", "td/actor")
             install_header("tde2e/td/e2e", "td/e2e")
             install_header("tdutils/td/utils", "td/utils")
-            os.cp("build/tdutils/td/utils/config.h", package:installdir("include/td/utils/config.h"))
+            os.cp("build/tdutils/td/utils/config.h", package:installdir("include/td/utils"))
         end
     end)
 
