@@ -35,6 +35,11 @@ package("td")
     end)
 
     on_install(function (package)
+        function install_header(from_dir, to_dir)
+            os.cp(from_dir .. "/**.h", package:installdir("include/" .. to_dir), {rootdir = from_dir})
+            os.cp(from_dir .. "/**.hpp", package:installdir("include/" .. to_dir), {rootdir = from_dir})
+        end
+
         local configs = {}
         table.insert(configs, "-DCMAKE_BUILD_TYPE=" .. (package:debug() and "Debug" or "Release"))
         table.insert(configs, "-DTD_INSTALL_STATIC_LIBRARIES=" .. (package:config("shared") and "OFF" or "ON"))
@@ -73,7 +78,18 @@ package("td")
             io.replace("td/generate/tl-parser/wgetopt.c", "extern char *getenv();", "#include <stdlib.h>", {plain = true})
         end
 
-        import("package.tools.cmake").install(package, configs, {target = package:config("shared") and "tdjson" or "tdjson_static"})
+        import("package.tools.cmake").install(package, configs, {target = package:config("shared") and "tdjson" or "tdjson_static", builddir = "build"})
+
+        if not package:config("shared") then
+            install_header("td/mtproto", "td/mtproto")
+            install_header("td/telegram", "td/telegram")
+            install_header("tdnet/td/net", "td/net")
+            install_header("tddb/td/db", "td/db")
+            install_header("tdactor/td/actor", "td/actor")
+            install_header("tde2e/td/e2e", "td/e2e")
+            install_header("tdutils/td/utils", "td/utils")
+            os.cp("build/tdutils/td/utils/config.h", package:installdir("include/td/utils/config.h"))
+        end
     end)
 
     on_test(function (package)
