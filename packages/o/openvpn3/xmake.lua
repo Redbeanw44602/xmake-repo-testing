@@ -55,7 +55,7 @@ package("openvpn3")
         os.cp("openvpn", package:installdir("include"))
         if package:is_plat("windows", "msys", "mingw", "cygwin") then
             local resdir = package:resourcedir("tap-windows6")
-            os.cp(path.join(resdir, "tap-windows.h"), package:installdir("include"))
+            os.cp(path.join(resdir, "../tap-windows.h"), package:installdir("include"))
         end
     end)
 
