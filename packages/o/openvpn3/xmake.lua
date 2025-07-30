@@ -12,7 +12,7 @@ package("openvpn3")
     add_configs("use_lzo", {description = "Enable LZO compression.", default = false, type = "boolean"})
 
     add_deps("cmake")
-    if not is_plat("windows") then
+    if not is_subhost("windows") then
         add_deps("pkg-config")
     else
         add_deps("pkgconf")
