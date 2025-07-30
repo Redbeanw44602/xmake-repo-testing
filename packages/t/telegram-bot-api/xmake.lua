@@ -27,6 +27,7 @@ package("telegram-bot-api")
                 if is_plat("windows") then
                     add_defines("_SCL_SECURE_NO_WARNINGS", "_CRT_SECURE_NO_WARNINGS")
                     add_cxflags("/utf-8", "/GR-", "/W4", "/wd4100", "/wd4127", "/wd4324", "/wd4505", "/wd4814", "/wd4702", "/bigobj", {tools = {"cl", "clang_cl"}})
+                    add_syslinks("shell32")
                 end
                 if is_plat("windows", "mingw", "msys") then
                     add_defines("NTDDI_VERSION=0x06020000", "WINVER=0x0602", "_WIN32_WINNT=0x0602", "PSAPI_VERSION=1", "NOMINMAX", "UNICODE", "_UNICODE", "WIN32_LEAN_AND_MEAN")
