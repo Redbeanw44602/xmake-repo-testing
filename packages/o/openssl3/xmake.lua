@@ -232,5 +232,9 @@ package("openssl3")
     end)
 
     on_test(function (package)
-        assert(package:has_cfuncs("SSL_new", {includes = "openssl/ssl.h"}))
+        assert(package:check_csnippets({test = [[
+            void test() {
+                SSL_new(0);
+            }
+        ]]}, {configs = {languages = "c99"}, includes = "openssl/ssl.h"}))
     end)
