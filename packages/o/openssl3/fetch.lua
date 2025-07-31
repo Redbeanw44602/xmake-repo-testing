@@ -24,9 +24,8 @@ function _find_package_on_windows(package, opt)
     if #result.links == 0 then
         -- find light package
         local arch = package:arch()
-        print('arch == ', arch)
         for _, name in ipairs({"libssl-3-" .. arch, "libcrypto-3-" .. arch}) do
-            local linkinfo = find_library(name, paths)
+            local linkinfo = find_library(name, paths, {suffixes = "lib"})
             if linkinfo then
                 table.insert(result.links, linkinfo.link)
                 table.insert(result.linkdirs, linkinfo.linkdir)
