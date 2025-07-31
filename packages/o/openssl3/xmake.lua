@@ -1,4 +1,4 @@
-package("openssl3")
+package("openssl3") 
     set_homepage("https://www.openssl.org/")
     set_description("A robust, commercial-grade, and full-featured toolkit for TLS and SSL.")
     set_license("Apache-2.0")
