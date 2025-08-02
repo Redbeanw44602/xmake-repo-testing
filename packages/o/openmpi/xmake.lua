@@ -1,6 +1,6 @@
 package("openmpi")
     set_homepage("https://www.open-mpi.org/")
-    set_description("Open MPI main development repository.")
+    set_description("A High Performance Message Passing Library.")
 
     set_urls("https://download.open-mpi.org/release/open-mpi/$(version).tar.gz", {version = function(version)
         -- 5.0.8 -> v5.0/openmpi-5.0.8
