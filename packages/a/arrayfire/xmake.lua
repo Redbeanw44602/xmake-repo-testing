@@ -36,7 +36,14 @@ package("arrayfire")
     end
 
     add_deps("cmake")
-    add_deps("opengl", "opengl-headers", "glad", "spdlog", "fmt", "span-lite", "clblast")
+    if not is_subhost("windows") then
+        add_deps("pkg-config")
+    else
+        add_deps("pkgconf")
+    end
+
+    add_deps("opengl", "opengl-headers", "glad", "span-lite", "clblast")
+    add_deps("spdlog", {configs = {header_only = false}})
     on_load(function (package)
         if package:config("cudnn") then
             package:config_set("cuda", true)
