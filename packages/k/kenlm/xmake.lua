@@ -13,16 +13,17 @@ package("kenlm")
     end
 
     add_deps("cmake")
-    add_deps("boost", {configs = {program_options = true, system = true, thread = true, test = true}})
+    add_deps("boost", {configs = {cmake = false, program_options = true, system = true, thread = true, test = true}})
     add_deps("zlib", "bzip2", "xz")
     add_includedirs("include/kenlm")
     on_load(function (package)
         package:add("defines", "KENLM_MAX_ORDER=" .. tostring(package:config("max_order")))
+        package:add("links", "kenlm_builder", "kenlm", "kenlm_filter", "kenlm_util")
     end)
 
     on_install(function (package)
         local configs = {
-            "BUILD_TESTING=OFF"
+            "-DBUILD_TESTING=OFF"
         }
         table.insert(configs, "-DCMAKE_BUILD_TYPE=" .. (package:is_debug() and "Debug" or "Release"))
         table.insert(configs, "-DBUILD_SHARED_LIBS=" .. (package:config("shared") and "ON" or "OFF"))
