@@ -44,6 +44,7 @@ package("arrayfire")
 
     add_deps("opengl", "opengl-headers", "glad", "span-lite", "clblast", "fmt")
     add_deps("spdlog", {configs = {header_only = false}})
+    add_deps("boost", {configs = {filesystem = false, stacktrace = true}})
     on_load(function (package)
         if package:config("cudnn") then
             package:config_set("cuda", true)
