@@ -32,6 +32,9 @@ package("kenlm")
         local options = { cxflags = {} }
         if package:is_plat("windows") then
             table.insert(options.cxflags, "-DNOMINMAX")
+            if package:has_tool("cxx", "cl", "clang_cl") then
+                table.insert(options.cxflags, "/EHsc")
+            end
         end
         if not package:dep("xz"):config("shared") then
             table.insert(options.cxflags, "-DLZMA_API_STATIC")
