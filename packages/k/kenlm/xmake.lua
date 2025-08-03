@@ -6,7 +6,7 @@ package("kenlm")
     add_urls("https://github.com/kpu/kenlm.git")
     add_versions("2025.03.31", "4cb443e60b7bf2c0ddf3c745378f76cb59e254e5")
 
-    if is_plat("windows", "msys", "mingw", "cygwin") and is_arch("x86", "i386") then
+    if is_plat("windows", "msys", "mingw", "cygwin") then
         -- unsupported!
         add_configs("shared", {description = "Build shared library.", default = false, type = "boolean", readonly = true})
     end
