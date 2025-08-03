@@ -67,7 +67,8 @@ package("arrayfire")
                 package:add("defines", "AF_MKL_INTERFACE_SIZE=4")
             end
         else
-            package:add("deps", "fftw", "lapack")
+            package:add("deps", "fftw", {configs = {precision = "float"}})
+            package:add("deps", "lapack")
         end
         local mkl_thread_layer = package:config("mkl_thread_layer")
         if mkl_thread_layer == "Sequential" then
@@ -85,6 +86,9 @@ package("arrayfire")
     on_install("linux", function (package)
         io.replace("CMakeLists.txt", "find_package(BLAS)", "pkg_check_modules(BLAS blas)", {plain = true})
         io.replace("CMakeLists.txt", "find_package(LAPACK)", "pkg_check_modules(LAPACK lapack)", {plain = true})
+        io.replace("CMakeLists.txt", "find_package(FFTW)", "pkg_check_modules(FFTW fftw3)", {plain = true})
+        io.replace("src/backend/cpu/CMakeLists.txt", "FFTW::FFTWF", "include_directories(${FFTW_INCLUDE_DIRS})\nlink_directories(${FFTW_LIBRARY_DIRS}", {plain = true})
+        io.replace("src/backend/cpu/CMakeLists.txt", "FFTW::FFTW", "${FFTW_LIBRARIES})", {plain = true})
         io.replace("src/backend/common/deterministicHash.cpp", "#include <numeric>", "#include <numeric>\n#include <cstdint>", {plain = true})
         io.replace("src/backend/common/ArrayFireTypesIO.hpp", "auto format(const arrayfire::common::Version& ver, FormatContext& ctx)", "auto format(const arrayfire::common::Version& ver, FormatContext& ctx) const", {plain = true})
         io.replace("src/backend/common/ArrayFireTypesIO.hpp", "bool show_", "mutable bool show_", {plain = true})
