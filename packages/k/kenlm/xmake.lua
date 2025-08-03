@@ -37,7 +37,7 @@ package("kenlm")
             table.insert(options.cxflags, "-DLZMA_API_STATIC")
         end
 
-        io.replace("CMakeLists.txt", "project(kenlm)", "project(kenlm)\ncmake_policy(SET CMP0167 NEW)", {plain = true})
+        io.replace("CMakeLists.txt", "set(Boost_USE_STATIC_LIBS OFF)", "", {plain = true})
         io.replace("cmake/KenLMFunctions.cmake", "function(AddExes)", "function(AddExes)\nreturn()", {plain = true})
 
         import("package.tools.cmake").install(package, configs, options)
