@@ -13,7 +13,7 @@ package("kenlm")
     end
 
     add_deps("cmake")
-    add_deps("boost", {configs = {cmake = false, program_options = true, system = true, thread = true, test = true}})
+    add_deps("boost", {configs = {program_options = true, system = true, thread = true, test = true}})
     add_deps("zlib", "bzip2", "xz")
     add_includedirs("include/kenlm")
     on_load(function (package)
