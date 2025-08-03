@@ -21,7 +21,7 @@ package("kenlm")
         package:add("links", "kenlm_builder", "kenlm", "kenlm_filter", "kenlm_util")
     end)
 
-    on_install(function (package)
+    on_install("!iphoneos and !wasm", function (package)
         local configs = {
             "-DBUILD_TESTING=OFF"
         }
@@ -29,9 +29,18 @@ package("kenlm")
         table.insert(configs, "-DBUILD_SHARED_LIBS=" .. (package:config("shared") and "ON" or "OFF"))
         table.insert(configs, "-DKENLM_MAX_ORDER=" .. tostring(package:config("max_order")))
 
+        local options = { cxflags = {} }
+        if package:is_plat("windows") then
+            table.insert(options.cxflags, "-DNOMINMAX")
+        end
+        if not package:dep("xz"):config("shared") then
+            table.insert(options.cxflags, "-DLZMA_API_STATIC")
+        end
+
+        io.replace("CMakeLists.txt", "project(kenlm)", "project(kenlm)\ncmake_policy(SET CMP0167 NEW)", {plain = true})
         io.replace("cmake/KenLMFunctions.cmake", "function(AddExes)", "function(AddExes)\nreturn()", {plain = true})
 
-        import("package.tools.cmake").install(package, configs)
+        import("package.tools.cmake").install(package, configs, options)
     end)
 
     on_test(function (package)
