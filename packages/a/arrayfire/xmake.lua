@@ -42,7 +42,7 @@ package("arrayfire")
         add_deps("pkgconf")
     end
 
-    add_deps("opengl", "opengl-headers", "glad", "span-lite", "clblast")
+    add_deps("opengl", "opengl-headers", "glad", "span-lite", "clblast", "fmt")
     add_deps("spdlog", {configs = {header_only = false}})
     on_load(function (package)
         if package:config("cudnn") then
@@ -80,7 +80,8 @@ package("arrayfire")
         end
     end)
 
-    on_install(function (package)
+    -- the lapack dep in xrepo only supports linux :(
+    on_install("linux", function (package)
         io.replace("CMakeLists.txt", "find_package(BLAS)", "pkg_check_modules(BLAS blas)", {plain = true})
         io.replace("CMakeLists.txt", "find_package(LAPACK)", "pkg_check_modules(LAPACK lapack)", {plain = true})
         io.replace("src/backend/common/deterministicHash.cpp", "#include <numeric>", "#include <numeric>\n#include <cstdint>", {plain = true})
