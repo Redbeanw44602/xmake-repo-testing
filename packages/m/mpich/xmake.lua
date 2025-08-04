@@ -11,7 +11,7 @@ package("mpich")
 
     if is_plat("linux") then
         add_extsources("apt::libmpich-dev")
-        add_syslinks("pthread", "dl", "rt")
+        add_syslinks("pthread", "dl", "rt", "m")
     end
 
     add_deps("hwloc")
@@ -43,6 +43,8 @@ package("mpich")
     end)
 
     on_test(function (package)
-        os.vrun("mpicc --version")
+        if not package:is_cross() then
+            os.vrun("mpicc --version")
+        end
         assert(package:has_cfuncs("MPI_Init", {includes = "mpi.h"}))
     end)
