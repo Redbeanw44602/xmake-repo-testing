@@ -11,7 +11,7 @@ package("mpich")
 
     if is_plat("linux") then
         add_extsources("apt::libmpich-dev")
-        add_syslinks("pthread", "dl", "rt")
+        add_syslinks("pthread", "dl", "rt", "rdmacm", "ibverbs", "nl-3", "efa")
     end
 
     add_deps("hwloc")
