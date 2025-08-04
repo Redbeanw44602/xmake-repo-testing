@@ -20,7 +20,7 @@ package("fftw")
     add_configs("precision", {description = "Float number precision. (deprecated)", default = nil, type = "string", values = {"float", "double", "quad", "long"}})
     add_configs("simd", {description = "SIMD instruction sets used. (deprecated)", default = nil, type = "string", values = {"none", "sse", "sse2", "avx", "avx2", "avx512", "avx-128-fma", "kcvi", "altivec", "vsx", "neon", "generic-simd128", "generic-simd256"}})
 
-    add_configs("precisions", {description = "The floating point precision to enable. (float|double|quad|long)", default = {"double"}, type = "table"})
+    add_configs("precisions", {description = "The floating point precision to enable. (float|double|quad|long)", default = {"float", "double"}, type = "table"})
     add_configs("optimizations", {description = "Optimization options enabled for each precision target. ()", default = default_optimizations, type = "table"})
 
     add_configs("thread", {description = "Thread model used.", default = "fftw", type = "string", values = {"none", "fftw", "openmp"}})
@@ -124,7 +124,10 @@ package("fftw")
     on_install("linux", function (package)
         import("lib.detect.find_tool")
 
-        local configs = {}
+        local configs = {
+            "--disable-dependency-tracking",
+            "--disable-doc"
+        }
         if package:config("shared") then
             table.insert(configs, "--enable-shared")
         end
