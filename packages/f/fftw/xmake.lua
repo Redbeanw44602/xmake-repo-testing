@@ -65,32 +65,33 @@ package("fftw")
     end)
 
     on_install(function (package)
-        local configs = {"-DBUILD_TESTS=OFF", "-DCMAKE_POLICY_DEFAULT_CMP0057=NEW"}
-
-        table.insert(configs, "-DCMAKE_BUILD_TYPE=" .. (package:is_debug() and "Debug" or "Release"))
-        table.insert(configs, "-DBUILD_SHARED_LIBS=" .. (package:config("shared") and "ON" or "OFF"))
-        table.insert(configs, "-DWITH_COMBINED_THREADS=" .. (package:config("shared") and "ON" or "OFF"))
-
-        if package:config("thread") == "fftw" then
-            table.insert(configs, "-DENABLE_THREADS=ON")
-        elseif package:config("thread") == "openmp" then
-            table.insert(configs, "-DENABLE_OPENMP=ON")
-        end
-
-        local opt = {}
-        if package:is_plat("mingw") then
-            opt.cxflags = "-DWITH_OUR_MALLOC"
-        end
-
         os.mkdir(".my_source")
         for _, filedir in ipairs(os.filedirs("*")) do
             if filedir ~= ".my_source" then
                 os.mv(filedir, ".my_source")
             end
         end
+
         for _, prec in ipairs(package:config("precisions")) do
             os.cp(".my_source", prec)
             os.cd(prec)
+
+            local configs = {"-DBUILD_TESTS=OFF", "-DCMAKE_POLICY_DEFAULT_CMP0057=NEW"}
+
+            table.insert(configs, "-DCMAKE_BUILD_TYPE=" .. (package:is_debug() and "Debug" or "Release"))
+            table.insert(configs, "-DBUILD_SHARED_LIBS=" .. (package:config("shared") and "ON" or "OFF"))
+            table.insert(configs, "-DWITH_COMBINED_THREADS=" .. (package:config("shared") and "ON" or "OFF"))
+
+            if package:config("thread") == "fftw" then
+                table.insert(configs, "-DENABLE_THREADS=ON")
+            elseif package:config("thread") == "openmp" then
+                table.insert(configs, "-DENABLE_OPENMP=ON")
+            end
+
+            local opt = {}
+            if package:is_plat("mingw") then
+                opt.cxflags = "-DWITH_OUR_MALLOC"
+            end
 
             if prec == "float" then
                 table.insert(configs, "-DENABLE_FLOAT=ON")
@@ -124,39 +125,40 @@ package("fftw")
     on_install("linux", function (package)
         import("lib.detect.find_tool")
 
-        local configs = {
-            "--disable-dependency-tracking",
-            "--disable-doc"
-        }
-        if package:config("shared") then
-            table.insert(configs, "--enable-shared")
-        end
-
-        if package:config("thread") == "fftw" then
-            table.insert(configs, "--enable-threads")
-        elseif package:config("thread") == "openmp" then
-            table.insert(configs, "--enable-openmp")
-        end
-        if package:config("enable_mpi") then
-            table.insert(configs, "--enable-mpi")
-        end
-
-        local fortran = find_tool("gfortran")
-        if fortran then
-            table.insert(configs, "F77=" .. fortran.program)
-        else
-            table.insert(configs, "--disable-fortran")
-        end
-
         os.mkdir(".my_source")
         for _, filedir in ipairs(os.filedirs("*")) do
             if filedir ~= ".my_source" then
                 os.mv(filedir, ".my_source")
             end
         end
+
         for _, prec in ipairs(package:config("precisions")) do
             os.cp(".my_source", prec)
             os.cd(prec)
+
+            local configs = {
+                "--disable-dependency-tracking",
+                "--disable-doc"
+            }
+            if package:config("shared") then
+                table.insert(configs, "--enable-shared")
+            end
+
+            if package:config("thread") == "fftw" then
+                table.insert(configs, "--enable-threads")
+            elseif package:config("thread") == "openmp" then
+                table.insert(configs, "--enable-openmp")
+            end
+            if package:config("enable_mpi") then
+                table.insert(configs, "--enable-mpi")
+            end
+
+            local fortran = find_tool("gfortran")
+            if fortran then
+                table.insert(configs, "F77=" .. fortran.program)
+            else
+                table.insert(configs, "--disable-fortran")
+            end
 
             if prec == "float" then
                 table.insert(configs, "--enable-float")
