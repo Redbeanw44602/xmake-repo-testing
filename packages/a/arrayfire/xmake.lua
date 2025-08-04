@@ -85,16 +85,11 @@ package("arrayfire")
     -- the lapack dep in xrepo only supports linux :(
     on_install("linux", function (package)
         io.replace("CMakeLists.txt", "find_package(BLAS)", "pkg_check_modules(BLAS blas)", {plain = true})
-        io.replace("CMakeLists.txt", "find_package(LAPACK)", "pkg_check_modules(LAPACK lapack)", {plain = true})
-        io.replace("CMakeLists.txt", "find_package(FFTW)", "pkg_check_modules(FFTW fftw3)\npkg_check_modules(FFTWF fftw3f)", {plain = true})
-        io.replace("src/backend/cpu/CMakeLists.txt", "FFTW::FFTWF", "include_directories(${FFTW_INCLUDE_DIRS})\nlink_directories(${FFTW_LIBRARY_DIRS})\ninclude_directories(${FFTWF_INCLUDE_DIRS})\nlink_directories(${FFTWF_LIBRARY_DIRS}", {plain = true})
-        io.replace("src/backend/cpu/CMakeLists.txt", "FFTW::FFTW", "${FFTW_LIBRARIES} ${FFTWF_LIBRARIES})", {plain = true})
+        io.replace("CMakeLists.txt", "find_package(LAPACK)", "pkg_check_modules(LAPACK lapack)\nlink_directories(${LAPACK_LIBRARY_DIRS})", {plain = true})
         io.replace("src/backend/common/deterministicHash.cpp", "#include <numeric>", "#include <numeric>\n#include <cstdint>", {plain = true})
         io.replace("src/backend/common/ArrayFireTypesIO.hpp", "auto format(const arrayfire::common::Version& ver, FormatContext& ctx)", "auto format(const arrayfire::common::Version& ver, FormatContext& ctx) const", {plain = true})
         io.replace("src/backend/common/ArrayFireTypesIO.hpp", "bool show_", "mutable bool show_", {plain = true})
         local configs = {
-            -- "-DCMAKE_FIND_DEBUG_MODE=ON",
-
             "-DAF_WITH_EXTERNAL_PACKAGES_ONLY=ON",
             "-DAF_BUILD_DOCS=OFF",
             "-DAF_BUILD_EXAMPLES=OFF",
