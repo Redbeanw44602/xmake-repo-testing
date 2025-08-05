@@ -3,7 +3,7 @@ package("flashlight")
     set_description("A C++ standalone library for machine learning.")
     set_license("MIT")
 
-    add_urls("https://github.com/flashlight/flashlight/archive/refs/tags/$(version).zip",
+    add_urls("https://github.com/flashlight/flashlight/archive/refs/tags/$(version).tar.gz",
              "https://github.com/flashlight/flashlight.git")
     add_versions("v0.3.2", "6557f65ef2fbacc867bb6721d9134d0bc15d29e7413cbce0ae5e28d857164029")
 
@@ -12,7 +12,7 @@ package("flashlight")
     add_configs("contrib",     {description = "Build and link additional flashlight contrib assets.", default = true, type = "boolean"})
     add_configs("distributed", {description = "Build and link a distributed backend with flashlight.", default = true, type = "boolean"})
     add_configs("backend",     {description = "Backend with which to build flashlight.", default = "cpu", type = "string", values = {"cpu", "cuda", "opencl"}})
-    add_configs("profiling",   {description = "Enable profiling with Flashlight." default = false, type = "boolean"})
+    add_configs("profiling",   {description = "Enable profiling with Flashlight.", default = false, type = "boolean"})
     add_configs("all_libs",    {description = "Build all flashlight libraries.", default = false, type = "boolean"})
 
     local libs = {"set", "sequence", "audio", "common", "text"}
@@ -22,7 +22,7 @@ package("flashlight")
 
     add_configs("all_pkgs",    {description = "Build all flashlight packages.", default = false, type = "boolean"})
 
-    local pkgs = {"runtime", "vision", "text", "speech", "halide"}
+    local pkgs = {"runtime", "vision", "text", "speech"}
     for _, pkg in ipairs(pkgs) do
         add_configs("pkg_" .. pkg, {description = "Build flashlight " .. pkg .. " library.", default = nil, type = "boolean"})
     end
@@ -46,7 +46,7 @@ package("flashlight")
         -- flahslight core
         if package:config("core") then
             if package:config("backend") == "cpu" then
-                package:add("deps", "onednn")
+                package:add("deps", "onednn 2.5")
                 package:add("defines", "FL_BACKEND_CPU=1")
             else
                 package:add("defines", "FL_BACKEND_CPU=0")
@@ -69,22 +69,17 @@ package("flashlight")
                 package:add("defines", "FL_BUILD_PROFILING=0")
             end
             if package:config("arrayfire") then
-                -- TODO: xrepo missing deps.
-                -- package:add("deps", "arrayfire")
+                package:add("deps", "arrayfire")
                 package:add("defines", "FL_USE_ARRAYFIRE=1")
             else
                 package:add("defines", "FL_USE_ARRAYFIRE=0")
             end
             if package:config("distributed") then
-                -- TODO: xrepo missing deps, openmpi.
                 package:add("deps", "mpich")
                 if package:config("backend") == "cuda" then
                     package:add("defines", "NO_NCCL_COMM_DESTROY_HANDLE")
-                    -- TODO: xrepo missing deps.
-                    -- package:add("deps", "nccl")
                 else
-                    -- TODO: xrepo missing deps.
-                    -- package:add("deps", "gloo")
+                    package:add("deps", "gloo")
                 end
             end
         else
@@ -105,8 +100,7 @@ package("flashlight")
         end
         if package:config("kenlm") then
             package:add("defines", "FL_LIBRARIES_USE_KENLM")
-            -- TODO: xrepo missing deps.
-            -- package:add("deps", "kenlm")
+            package:add("deps", "kenlm")
         end
 
         -- flashlight libraries
@@ -131,11 +125,6 @@ package("flashlight")
                     package:config_set("pkg_" .. lib, true)
                 end
             end
-        end
-        if package:config("pkg_halide") then
-            assert(package:config("backend") == "cuda", "Flashlight Halide integration only available with the CUDA backend for now.")
-            -- TODO: xrepo missing deps.
-            -- package:add("deps", "halide")
         end
         if package:config("pkg_runtime") then
             package:add("deps", "glog", "gflags")
@@ -162,7 +151,7 @@ package("flashlight")
         end
     end)
 
-    on_install("linux", "windows", "macosx", function (package)
+    on_install("linux", function (package)
         local configs = {
             "-DFL_BUILD_TESTS=OFF",
             "-DFL_BUILD_EXAMPLES=OFF",
@@ -191,12 +180,21 @@ package("flashlight")
                 table.insert(configs, ("-DFL_LIBRARIES_USE_%s=ON"):format(lib:upper()))
             end
         end
+        io.replace("flashlight/fl/autograd/CMakeLists.txt", "DNNL 2.0 CONFIG", "DNNL", {plain = true})
+        io.replace("CMakeLists.txt", "find_package(cereal)", [[
+            find_package(PkgConfig REQUIRED)
+            pkg_check_modules(cereal REQUIRED cereal)
+            include_directories(${cereal_INCLUDE_DIRS})
+        ]], {plain = true})
+        io.replace("flashlight/fl/common/Logging.cpp", "#include <utility>", "#include <utility>\n#include <array>", {plain = true})
 
         import("package.tools.cmake").install(package, configs)
     end)
 
     on_test(function (package)
         assert(package:check_cxxsnippets({test = [[
-
-        ]]}, {configs = {languages = "c++17"}}))
+            void test() {
+                fl::init();
+            }
+        ]]}, {configs = {languages = "c++17"}, includes = "flashlight/fl/flashlight.h"}))
     end)
