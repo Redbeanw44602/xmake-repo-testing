@@ -151,7 +151,7 @@ package("flashlight")
         end
     end)
 
-    on_install("linux", function (package)
+    on_install("linux|x86_64", function (package)
         local configs = {
             "-DFL_BUILD_TESTS=OFF",
             "-DFL_BUILD_EXAMPLES=OFF",
@@ -186,6 +186,7 @@ package("flashlight")
             pkg_check_modules(cereal REQUIRED cereal)
             include_directories(${cereal_INCLUDE_DIRS})
         ]], {plain = true})
+        io.replace("CMakeLists.txt", "target_link_libraries(flashlight PRIVATE cereal)", "", {plain = true})
         io.replace("flashlight/fl/common/Logging.cpp", "#include <utility>", "#include <utility>\n#include <array>", {plain = true})
         io.replace("flashlight/fl/tensor/TensorBase.h", "#include <vector>", "#include <vector>\n#include <cstdint>", {plain = true})
         io.replace("flashlight/fl/tensor/TensorBase.cpp", "#include <utility>", "#include <utility>\n#include <algorithm>", {plain = true})
