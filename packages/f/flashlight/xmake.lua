@@ -79,7 +79,7 @@ package("flashlight")
                 if package:config("backend") == "cuda" then
                     package:add("defines", "NO_NCCL_COMM_DESTROY_HANDLE")
                 else
-                    package:add("deps", "gloo")
+                    package:add("deps", "gloo", {configs = {mpi = true}})
                 end
             end
         else
@@ -187,6 +187,8 @@ package("flashlight")
             include_directories(${cereal_INCLUDE_DIRS})
         ]], {plain = true})
         io.replace("flashlight/fl/common/Logging.cpp", "#include <utility>", "#include <utility>\n#include <array>", {plain = true})
+        io.replace("flashlight/fl/tensor/TensorBase.h", "#include <vector>", "#include <vector>\n#include <cstdint>", {plain = true})
+        io.replace("flashlight/fl/tensor/TensorBase.cpp", "#include <utility>", "#include <utility>\n#include <algorithm>", {plain = true})
 
         import("package.tools.cmake").install(package, configs)
     end)
