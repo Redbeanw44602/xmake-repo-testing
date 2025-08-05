@@ -21,9 +21,9 @@ package("gloo")
     if is_plat("linux", "bsd") then
         add_syslinks("pthread")
     end
-    if is_plat("windows", "mingw", "msys", "cygwin") then
-        add_syslinks("ws2_32")
-    end
+    -- if is_plat("windows", "mingw", "msys", "cygwin") then
+    --     add_syslinks("ws2_32")
+    -- end
 
     on_check(function (package)
         assert(package:is_arch("x86_64", "x64", "arm64", "arm64-v8a"), "Gloo can only be built on 64-bit systems.")
@@ -41,7 +41,7 @@ package("gloo")
         end
     end)
 
-    on_install("!windows", function (package)
+    on_install("!windows and !mingw", function (package)
         local configs = {}
         table.insert(configs, "-DCMAKE_BUILD_TYPE=" .. (package:is_debug() and "Debug" or "Release"))
         table.insert(configs, "-DBUILD_SHARED_LIBS=" .. (package:config("shared") and "ON" or "OFF"))
@@ -55,7 +55,6 @@ package("gloo")
 
         io.replace("gloo/types.h", "#include <iostream>", "#include <iostream>\n#include <cstdint>", {plain = true})
         io.replace("gloo/rendezvous/file_store.cc", "#if defined(_MSC_VER)", "#if defined(_WIN32)", {plain = true})
-        io.replace("gloo/common/utils.cc", "#include <winsock2.h>", "#include <winsock2.h>\n#pragma comment(lib, \"Ws2_32.lib\")", {plain = true})
 
         import("package.tools.cmake").install(package, configs)
     end)
