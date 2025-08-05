@@ -38,7 +38,7 @@ package("gloo")
         end
     end)
 
-    on_install(function (package)
+    on_install("!windows", function (package)
         local configs = {}
         table.insert(configs, "-DCMAKE_BUILD_TYPE=" .. (package:is_debug() and "Debug" or "Release"))
         table.insert(configs, "-DBUILD_SHARED_LIBS=" .. (package:config("shared") and "ON" or "OFF"))
@@ -51,6 +51,7 @@ package("gloo")
         end
 
         io.replace("gloo/types.h", "#include <iostream>", "#include <iostream>\n#include <cstdint>", {plain = true})
+        io.replace("gloo/rendezvous/file_store.cc", "#if defined(_MSC_VER)", "#if defined(_WIN32)", {plain = true})
 
         import("package.tools.cmake").install(package, configs)
     end)
