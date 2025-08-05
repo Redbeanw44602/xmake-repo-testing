@@ -55,8 +55,13 @@ package("gloo")
 
         io.replace("gloo/types.h", "#include <iostream>", "#include <iostream>\n#include <cstdint>", {plain = true})
         io.replace("gloo/rendezvous/file_store.cc", "#if defined(_MSC_VER)", "#if defined(_WIN32)", {plain = true})
+        
+        local opt = {}
+        if package:is_plat("mingw", "msys", "cygwin") then
+            opt.shflags = "-lWs2_32"
+        end
 
-        import("package.tools.cmake").install(package, configs)
+        import("package.tools.cmake").install(package, configs, opt)
     end)
 
     on_test(function (package)
