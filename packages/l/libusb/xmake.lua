@@ -40,7 +40,7 @@ package("libusb")
         add_ldflags("--bind", "-s ASYNCIFY=1")
     end
 
-    on_check("wasm", function (target)
+    on_check("wasm", function (package)
         if package:version() and package:version():le("1.0.26") then
             raise("package(libusb <=1.0.26) unsupported platform!")
         end
