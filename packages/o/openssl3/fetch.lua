@@ -55,7 +55,6 @@ function _find_package_on_windows(package, opt)
             end
         end
     end
-    print('fetch result', result)
     return result
 end
 

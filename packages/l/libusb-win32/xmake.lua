@@ -9,7 +9,7 @@ package("libusb-win32")
     add_versions("tarball:1.4.0", "78a002442e98d2f01c469ac7d01283f9655e257e18c4ad7670d00494b48deb8d")
     add_versions("git:1.4.0", "release_1.4.0.0")
 
-    on_install("windows", function (package)
+    on_install("windows", "mingw", "msys", "cygwin", function (package)
         os.cd("libusb")
         io.writefile("xmake.lua", [[
             add_rules("mode.debug", "mode.release")
