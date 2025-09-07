@@ -1,0 +1,89 @@
+package("hashcat")
+    set_homepage("https://hashcat.net/hashcat/")
+    set_description("World's fastest and most advanced password recovery utility.")
+
+    set_urls("https://github.com/hashcat/hashcat/archive/refs/tags/$(version).tar.gz",
+             "https://github.com/hashcat/hashcat.git")
+    add_versions("v7.1.2", "9546a6326d747530b44fcc079babad40304a87f32d3c9080016d58b39cfc8b96")
+
+    -- if shared=false is specified, the library will not be built.
+    add_configs("shared", {description = "Build shared library.", default = true, type = "boolean", readonly = true})
+
+    add_configs("frontend", {description = "Build the hashcat frontend executable.", default = true, type = "boolean"})
+
+    if is_plat("linux") then
+        add_syslinks("pthread", "dl", "rt", "m")
+    elseif is_plat("bsd") then
+        add_syslinks("pthread", "m", "iconv")
+    elseif is_plat("macosx") then
+        add_syslinks("pthread", "iconv", "IOReport")
+        add_frameworks("CoreFoundation", "CoreGraphics", "Foundation", "IOKit", "Metal")
+    elseif is_plat("cygwin") then
+        add_syslinks("psapi", "iconv")
+    elseif is_plat("msys") then
+        add_syslinks("psapi", "iconv", "ws2_32", "powrprof")
+    end
+
+    add_deps("python >=3.12")
+    add_deps("lzma", "zlib", "opencl-headers", "xxhash")
+    on_load(function (package)
+        package:add("includedirs", "include", "include/OpenCL")
+        package:add("links", "hashcat")
+    end)
+
+    on_install("linux", "bsd", "mingw", "msys", "cygwin", function (package)
+        import("package.tools.make")
+
+        local configs = {
+            "PRODUCTION=1",
+            "USE_SYSTEM_LZMA=1",
+            "USE_SYSTEM_ZLIB=1",
+            "USE_SYSTEM_OPENCL=1",
+            "USE_SYSTEM_XXHASH=1"
+        }
+
+        table.insert(configs, "DEBUG=" .. (package:is_debug() and "1" or "0"))
+        table.insert(configs, "SHARED=" .. (package:config("shared") and "1" or "0"))
+        table.insert(configs, "PREFIX=\"" .. package:installdir() .. "\"")
+
+        local envs = make.buildenvs(package)
+
+        local cflags = {}
+        local ldflags = {}
+        for _, dep in ipairs(package:orderdeps()) do
+            local fetchinfo = dep:fetch()
+            if fetchinfo then
+                for _, includedir in ipairs(fetchinfo.includedirs or fetchinfo.sysincludedirs) do
+                    table.insert(cflags, "-I" .. includedir)
+                end
+                for _, linkdir in ipairs(fetchinfo.linkdirs) do
+                    table.insert(ldflags, "-L" .. linkdir)
+                end
+            end
+        end
+
+        envs.CFLAGS = envs.CFLAGS .. " " .. table.concat(cflags, " ")
+        envs.LDFLAGS = envs.LDFLAGS .. " " .. table.concat(ldflags, " ")
+
+        if not package:config("frontend") then
+            io.replace("src/Makefile", "default: $(HASHCAT_FRONTEND)", "default: $(HASHCAT_LIBRARY)", {plain = true})
+            io.replace("src/Makefile", "install_feeds install_hashcat", "install_feeds", {plain = true})
+        end
+
+        io.replace("src/Makefile", "-llzmasdk", "-llzma", {plain = true})
+        io.replace("src/Makefile", "install: install_docs", "install: ", {plain = true})
+        io.replace("src/Makefile", ".$(VERSION_PURE)", "", {plain = true})
+
+        make.build(package, configs, {envs = envs})
+
+        table.insert(configs, "install")
+        make.make(package, configs, {envs = envs})
+
+        os.cp("OpenCL", package:installdir("include"))
+    end)
+
+    on_test(function (package)
+        local prefix = ".exe" and is_host("windows") or ""
+        assert(os.isexec(package:installdir("bin/hashcat" .. prefix)), "hashcat executable not found!")
+        assert(package:has_cfuncs("hashcat_init", {includes = {"hashcat/types.h", "hashcat/hashcat.h"}}))
+    end)
