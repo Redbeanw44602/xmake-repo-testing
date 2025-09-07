@@ -1,6 +1,7 @@
 package("hashcat")
     set_homepage("https://hashcat.net/hashcat/")
     set_description("World's fastest and most advanced password recovery utility.")
+    set_license("MIT")
 
     set_urls("https://github.com/hashcat/hashcat/archive/refs/tags/$(version).tar.gz",
              "https://github.com/hashcat/hashcat.git")
@@ -25,10 +26,9 @@ package("hashcat")
     end
 
     add_deps("python >=3.12")
-    add_deps("lzma", "zlib", "opencl-headers", "xxhash")
+    add_deps("lzma", "zlib", "opencl-headers", "xxhash", "minizip")
     on_load(function (package)
         package:add("includedirs", "include", "include/OpenCL")
-        package:add("links", "hashcat")
     end)
 
     on_install("linux", "bsd", "mingw", "msys", "cygwin", function (package)
