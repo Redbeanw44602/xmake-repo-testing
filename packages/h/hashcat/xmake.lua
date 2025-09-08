@@ -15,14 +15,14 @@ package("hashcat")
     if is_plat("linux") then
         add_syslinks("pthread", "dl", "rt", "m")
     elseif is_plat("bsd") then
-        add_syslinks("pthread", "m", "iconv")
+        add_syslinks("pthread", "m")
     elseif is_plat("macosx") then
-        add_syslinks("pthread", "iconv", "IOReport")
+        add_syslinks("pthread", "IOReport")
         add_frameworks("CoreFoundation", "CoreGraphics", "Foundation", "IOKit", "Metal")
     elseif is_plat("cygwin") then
-        add_syslinks("psapi", "iconv")
+        add_syslinks("psapi")
     elseif is_plat("msys") then
-        add_syslinks("psapi", "iconv", "ws2_32", "powrprof")
+        add_syslinks("psapi", "ws2_32", "powrprof")
     end
 
     add_deps("python >=3.12")
