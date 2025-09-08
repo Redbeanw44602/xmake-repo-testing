@@ -5,9 +5,13 @@ package("libxls")
     add_urls("https://github.com/libxls/libxls/archive/refs/tags/$(version).tar.gz",
              "https://github.com/libxls/libxls.git")
     add_versions("v1.6.3", "587c9f0ebb5647eb68ec1e0ed8c3f7f6102622d6dd83473a21d3a36dee04eed7")
-    
+
+    if is_plat("wasm") then
+        add_configs("shared", {description = "Build shared library.", default = false, type = "boolean", readonly = true})
+    end
+
     add_deps("libiconv")
-    on_install(function (package)
+    on_install("!windows", function (package)
         io.writefile("xmake.lua", ([[
             add_rules("mode.debug", "mode.release")
             add_requires("libiconv")
@@ -16,6 +20,7 @@ package("libxls")
                 set_languages("gnu99")
 
                 add_files("src/**.c")
+                remove_files("src/xls2csv.c")
                 add_includedirs("include")
                 add_headerfiles("include/(**.h)")
 
