@@ -31,7 +31,7 @@ package("hashcat")
         package:add("includedirs", "include", "include/OpenCL")
     end)
 
-    on_install("linux", "bsd", "mingw", "msys", "cygwin", function (package)
+    on_install("linux", "bsd", "macosx", "mingw", "msys", "cygwin", function (package)
         import("package.tools.make")
 
         local configs = {
@@ -44,7 +44,7 @@ package("hashcat")
 
         table.insert(configs, "DEBUG=" .. (package:is_debug() and "1" or "0"))
         table.insert(configs, "SHARED=" .. (package:config("shared") and "1" or "0"))
-        table.insert(configs, "PREFIX=\"" .. package:installdir() .. "\"")
+        table.insert(configs, "PREFIX=" .. package:installdir())
 
         local envs = make.buildenvs(package)
 
