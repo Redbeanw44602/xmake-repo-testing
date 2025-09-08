@@ -61,6 +61,7 @@ package("hashcat")
                 end
             end
         end
+        table.insert(ldflags, "-liconv")
 
         envs.CFLAGS = envs.CFLAGS .. " " .. table.concat(cflags, " ")
         envs.LDFLAGS = envs.LDFLAGS .. " " .. table.concat(ldflags, " ")
