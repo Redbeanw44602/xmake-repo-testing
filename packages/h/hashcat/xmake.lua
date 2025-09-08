@@ -44,7 +44,7 @@ package("hashcat")
 
         table.insert(configs, "DEBUG=" .. (package:is_debug() and "1" or "0"))
         table.insert(configs, "SHARED=" .. (package:config("shared") and "1" or "0"))
-        table.insert(configs, "PREFIX=" .. package:installdir())
+        table.insert(configs, "PREFIX=" .. package:installdir():gsub("\\", "/"))
 
         local envs = make.buildenvs(package)
 
