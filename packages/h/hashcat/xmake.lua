@@ -26,7 +26,7 @@ package("hashcat")
     end
 
     add_deps("python >=3.12")
-    add_deps("lzma", "zlib", "opencl-headers", "xxhash", "minizip")
+    add_deps("lzma", "zlib", "opencl-headers", "xxhash", "minizip", "libiconv")
     on_load(function (package)
         package:add("includedirs", "include", "include/OpenCL")
     end)
