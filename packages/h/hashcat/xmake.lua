@@ -31,7 +31,7 @@ package("hashcat")
         package:add("includedirs", "include", "include/OpenCL")
     end)
 
-    on_install("linux", "bsd", "macosx", "mingw", "msys", "cygwin", function (package)
+    on_install("!windows", function (package)
         import("package.tools.make")
 
         local configs = {
@@ -74,6 +74,7 @@ package("hashcat")
         io.replace("src/Makefile", "-llzmasdk", "-llzma", {plain = true})
         io.replace("src/Makefile", "install: install_docs", "install: ", {plain = true})
         io.replace("src/Makefile", ".$(VERSION_PURE)", "", {plain = true})
+        io.replace("src/Makefile", "modules bridges feeds", "modules feeds", {plain = true})
 
         make.build(package, configs, {envs = envs})
 
