@@ -91,7 +91,7 @@ package("hashcat")
 
         -- sometimes hashcat will misjudge the platform.
         if package:is_plat("msys", "mingw") then
-            table.insert(configs, "UNAME=MSYS")
+            table.insert(configs, "UNAME=MSYS2")
         end
 
         make.build(package, configs, {envs = envs})
