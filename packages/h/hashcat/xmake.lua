@@ -32,7 +32,8 @@ package("hashcat")
         package:add("includedirs", "include", "include/OpenCL")
     end)
 
-    on_install("linux", "bsd", "macosx", "msys", "mingw", "cygwin", function (package)
+    -- unsupported mingw on macosx: gendef tool is missing.
+    on_install("linux", "bsd", "macosx", "msys", "mingw@windows,linux", "cygwin", function (package)
         import("package.tools.make")
 
         local configs = {
@@ -112,11 +113,8 @@ package("hashcat")
         -- fix hashcat import library on msys.
         if package:is_plat("msys", "mingw", "cygwin") then
             os.cd(package:installdir("lib"))
-            os.vrun("ls /opt/homebrew/opt/mingw-w64/bin/")
-            local dlltool = package:tool("dlltool")
-            local gendef = dlltool:gsub("dlltool", "gendef") -- WAIT TO PR TO XMAKE.
-            os.vrunv(gendef, {"hashcat.dll"})
-            os.vrunv(dlltool, {"-d", "hashcat.def", "-l", "libhashcat.a", "-D", "hashcat.dll"})
+            os.vrun("gendef hashcat.dll")
+            os.vrun("dlltool -d hashcat.def -l libhashcat.a -D hashcat.dll")
             os.mv("hashcat.dll", "../bin")
         end
     end)
