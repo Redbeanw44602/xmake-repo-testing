@@ -31,7 +31,7 @@ package("hashcat")
         package:add("includedirs", "include", "include/OpenCL")
     end)
 
-    on_install("!windows", function (package)
+    on_install("linux", "bsd", "macosx", "msys", "mingw", "cygwin", function (package)
         import("package.tools.make")
 
         local configs = {
@@ -75,6 +75,11 @@ package("hashcat")
         io.replace("src/Makefile", "install: install_docs", "install: ", {plain = true})
         io.replace("src/Makefile", ".$(VERSION_PURE)", "", {plain = true})
         io.replace("src/Makefile", "modules bridges feeds", "modules feeds", {plain = true})
+
+        if package:is_plat("macosx") and not package:is_arch("x86_64") then
+            io.replace("src/Makefile", "CFLAGS_NATIVE           += -arch x86_64")
+            io.replace("src/Makefile", "LFLAGS_NATIVE           += -arch x86_64")
+        end
 
         make.build(package, configs, {envs = envs})
 
