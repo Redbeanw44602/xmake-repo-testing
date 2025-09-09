@@ -112,6 +112,8 @@ package("hashcat")
         -- fix hashcat import library on msys.
         if package:is_plat("msys", "mingw", "cygwin") then
             os.cd(package:installdir("lib"))
+            os.vrun("gendef --help")
+            os.vrun("dlltool --help")
             os.vrun("gendef hashcat.dll")
             os.vrun("dlltool -d hashcat.def -l libhashcat.a -D hashcat.dll")
             os.mv("hashcat.dll", "../bin")
