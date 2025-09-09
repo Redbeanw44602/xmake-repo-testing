@@ -91,6 +91,9 @@ package("hashcat")
 
         make.build(package, configs, {envs = envs})
 
+        -- enable installation in msys, since we defined PREFIX.
+        io.replace("src/Makefile", "$(error $(ERROR_INSTALL_DISALLOWED))", "", {plain = true})
+
         table.insert(configs, "install")
         make.make(package, configs, {envs = envs})
 
