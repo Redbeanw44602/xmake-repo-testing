@@ -11,6 +11,7 @@ package("hashcat")
     add_configs("shared", {description = "Build shared library.", default = true, type = "boolean", readonly = true})
 
     add_configs("frontend", {description = "Build the hashcat frontend executable.", default = true, type = "boolean"})
+    add_configs("bridge", {description = "Build the cross-language bridges.", default = false, type = "boolean"})
 
     if is_plat("linux") then
         add_syslinks("pthread", "dl", "rt", "m")
@@ -68,17 +69,24 @@ package("hashcat")
 
         if not package:config("frontend") then
             io.replace("src/Makefile", "default: $(HASHCAT_FRONTEND)", "default: $(HASHCAT_LIBRARY)", {plain = true})
-            io.replace("src/Makefile", "install_feeds install_hashcat", "install_feeds", {plain = true})
+            io.replace("src/Makefile", "install_bridges install_hashcat", "install_bridges", {plain = true})
         end
 
         io.replace("src/Makefile", "-llzmasdk", "-llzma", {plain = true})
         io.replace("src/Makefile", "install: install_docs", "install: ", {plain = true})
         io.replace("src/Makefile", ".$(VERSION_PURE)", "", {plain = true})
-        io.replace("src/Makefile", "modules bridges feeds", "modules feeds", {plain = true})
 
         if package:is_plat("macosx") and not package:is_arch("x86_64") then
             io.replace("src/Makefile", "CFLAGS_NATIVE           += -arch x86_64", "", {plain = true})
             io.replace("src/Makefile", "LFLAGS_NATIVE           += -arch x86_64", "", {plain = true})
+        end
+
+        if not package:config("bridge") then
+            io.replace("src/Makefile", "modules bridges", "modules", {plain = true})
+            io.replace("src/Makefile", "modules_linux bridges_linux", "modules_linux", {plain = true})
+            io.replace("src/Makefile", "modules_win bridges_win", "modules_win", {plain = true})
+            io.replace("src/Makefile", "install_modules install_bridges", "install_modules", {plain = true})
+            io.replace("src/Makefile", "include $(wildcard src/bridges/bridge_*.mk)", "", {plain = true})
         end
 
         make.build(package, configs, {envs = envs})
@@ -90,7 +98,9 @@ package("hashcat")
     end)
 
     on_test(function (package)
-        local prefix = ".exe" and is_host("windows") or ""
-        assert(os.isexec(package:installdir("bin/hashcat" .. prefix)), "hashcat executable not found!")
+        if package:config("frontend") then
+            local prefix = ".exe" and is_host("windows") or ""
+            assert(os.isexec(package:installdir("bin/hashcat" .. prefix)), "hashcat executable not found!")
+        end
         assert(package:has_cfuncs("hashcat_init", {includes = {"hashcat/types.h", "hashcat/hashcat.h"}}))
     end)
