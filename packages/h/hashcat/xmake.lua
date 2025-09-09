@@ -102,7 +102,7 @@ package("hashcat")
 
     on_test(function (package)
         if package:config("frontend") then
-            local prefix = ".exe" and is_host("windows") or ""
+            local prefix = is_host("windows") and ".exe" or ""
             assert(os.isexec(package:installdir("bin/hashcat" .. prefix)), "hashcat executable not found!")
         end
         assert(package:has_cfuncs("hashcat_init", {includes = {"hashcat/types.h", "hashcat/hashcat.h"}}))
