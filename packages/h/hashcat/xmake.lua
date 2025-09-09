@@ -89,6 +89,11 @@ package("hashcat")
             io.replace("src/Makefile", "include $(wildcard src/bridges/bridge_*.mk)", "", {plain = true})
         end
 
+        -- sometimes hashcat will misjudge the platform.
+        if package:is_plat("msys", "mingw") then
+            table.insert(configs, "UNAME=MSYS")
+        end
+
         make.build(package, configs, {envs = envs})
 
         if package:is_plat("msys", "mingw", "cygwin") then
@@ -101,8 +106,8 @@ package("hashcat")
 
         os.cp("OpenCL", package:installdir("include"))
 
+        -- fix hashcat import library on msys.
         if package:is_plat("msys", "mingw", "cygwin") then
-            -- fix hashcat import library.
             os.cd(package:installdir("lib"))
             os.vrun("gendef hashcat.dll")
             os.vrun("dlltool -d hashcat.def -l libhashcat.a -D hashcat.dll")
