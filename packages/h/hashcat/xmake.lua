@@ -91,13 +91,23 @@ package("hashcat")
 
         make.build(package, configs, {envs = envs})
 
-        -- enable installation in msys, since we defined PREFIX.
-        io.replace("src/Makefile", "$(error $(ERROR_INSTALL_DISALLOWED))", "", {plain = true})
+        if package:is_plat("msys", "mingw", "cygwin") then
+            -- enable installation in msys, since we defined PREFIX.
+            io.replace("src/Makefile", "$(error $(ERROR_INSTALL_DISALLOWED))", "", {plain = true})
+        end
 
         table.insert(configs, "install")
         make.make(package, configs, {envs = envs})
 
         os.cp("OpenCL", package:installdir("include"))
+
+        if package:is_plat("msys", "mingw", "cygwin") then
+            -- fix hashcat import library.
+            os.cd(package:installdir("lib"))
+            os.vrun("gendef hashcat.dll")
+            os.vrun("dlltool -d hashcat.def -l libhashcat.a -D hashcat.dll")
+            os.mv("hashcat.dll", "../bin")
+        end
     end)
 
     on_test(function (package)
