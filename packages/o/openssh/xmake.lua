@@ -83,6 +83,7 @@ package("openssh")
 
     on_install("linux", "bsd", "macosx", "mingw", "msys", "cygwin", function (package)
         local configs = {}
+        local cxflags = {}
 
         local features_enabled_by_default = {
             "largefile", "pkcs11", "security-key", "strip", "etc-default-login", "fd-passing",
@@ -141,8 +142,13 @@ package("openssh")
         if package:config("lastlog_dir") then
             table.insert(configs, "--with-lastlog=" .. package:config("lastlog"))
         end
+        
+        -- fix 'working libcrypto not found' problem.
+        if package:config("libcrypto"):startswith("openssl") and package:is_plat("bsd", "msys") then
+            table.insert(cxflags, "-pthread")
+        end
 
-        import("package.tools.autoconf").install(package, configs)
+        import("package.tools.autoconf").install(package, configs, {cxflags = cxflags})
     end)
 
     on_test(function (package)
