@@ -65,7 +65,7 @@ package("openssh")
     on_load(function (package)
         local libcrypto = package:config("libcrypto")
         if libcrypto ~= "builtin" then
-            package:add("deps", libcrypto)
+            package:add("deps", libcrypto, {configs = {shared = true}})
         end
 
         if package:config("zlib") then
