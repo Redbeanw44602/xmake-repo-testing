@@ -51,15 +51,11 @@ jobs:
           else
             xmake l ./scripts/test.lua -vD -p mingw -a i386 -k ${{ matrix.kind }}
           fi
-      
-      - name: TEST
-        if: failure()
-        run: |
-          ls ~/AppData/Local/.xmake
-      
-      - name: Failure Dbghelp
+
+      - name: Upload Xmake Home
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: xmake-home
+          include-hidden-files: true
           path: ~/AppData/Local/.xmake
