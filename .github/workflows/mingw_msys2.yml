@@ -58,4 +58,5 @@ jobs:
         with:
           name: xmake-home-${{ matrix.arch }}-${{ matrix.kind }}
           include-hidden-files: true
+          retention-days: 1
           path: ~/AppData/Local/.xmake
