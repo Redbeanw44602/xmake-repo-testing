@@ -53,19 +53,12 @@ package("openssh")
     add_configs("ip4in6",                  {description = "Check for and convert IPv4 in IPv6 mapped addresses.", type = "boolean", default = nil})
     add_configs("bsd_auth",                {description = "Enable BSD auth support.", type = "boolean", default = nil})
     add_configs("pid_dir",                 {description = "Specify location of sshd.pid file.", type = "string", default = nil})
-    add_configs("lastlog_dir",                 {description = "Specify lastlog location common locations.", type = "string", default = nil})
-
-    if is_plat("msys") then
-        -- from: https://github.com/msys2/MSYS2-packages/tree/master/openssh
-        -- add_patches("*", "patches/7.3p1/msys2-drive-name-in-path.patch", "903b3eee51e492a125cab9c724ad967450307d53e457f025e4432b81cb145af5")
-        -- add_patches("*", "patches/7.3p1/msys2-setkey.patch", "25079cf4a10c1ab70d60302bccaabee513762520dffd7c35285f7aae3ea36087")
-        -- add_patches("*", "patches/7.3p1/msys2.patch", "4ac8da8f0933eae61e3b973e627c0c152ea4168c28cdc27066f9a5d54432f578")
-    end
+    add_configs("lastlog_dir",             {description = "Specify lastlog location common locations.", type = "string", default = nil})
 
     on_load(function (package)
         local libcrypto = package:config("libcrypto")
         if libcrypto ~= "builtin" then
-            package:add("deps", libcrypto, {configs = {shared = true}})
+            package:add("deps", libcrypto)
         end
 
         if package:config("zlib") then
@@ -98,7 +91,7 @@ package("openssh")
         local packages_boolean = {
             "stackprotect", "hardening", "retpoline", "linux-memlock-onfault",
             "pie", "security-key-builtin","security-key-standalone", "ssl-engine",
-            "pam", "selinux", "shadow", "ipaddr-display", "ip4in6", "bsd-auth"
+            "pam", "selinux", "shadow", "ipaddr-display", "bsd-auth"
         }
         local packages_string = {
             "prngd-socket", "pam-service", "privsep-user",
@@ -144,7 +137,7 @@ package("openssh")
         end
         
         -- fix 'working libcrypto not found' problem.
-        if package:config("libcrypto"):startswith("openssl") and package:is_plat("bsd", "msys") then
+        if package:config("libcrypto"):startswith("openssl") and package:is_plat("bsd") then
             table.insert(ldflags, "-pthread")
         end
 
