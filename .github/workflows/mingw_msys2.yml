@@ -51,4 +51,10 @@ jobs:
           else
             xmake l ./scripts/test.lua -vD -p mingw -a i386 -k ${{ matrix.kind }}
           fi
-
+      
+      - name: Failure Dbghelp
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xmake-home
+          path: C:/Users/runneradmin/AppData/Local/.xmake
