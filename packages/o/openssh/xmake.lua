@@ -57,9 +57,9 @@ package("openssh")
 
     if is_plat("msys") then
         -- from: https://github.com/msys2/MSYS2-packages/tree/master/openssh
-        add_patches("*", "patches/7.3p1/msys2-drive-name-in-path.patch", "903b3eee51e492a125cab9c724ad967450307d53e457f025e4432b81cb145af5")
-        add_patches("*", "patches/7.3p1/msys2-setkey.patch", "25079cf4a10c1ab70d60302bccaabee513762520dffd7c35285f7aae3ea36087")
-        add_patches("*", "patches/7.3p1/msys2.patch", "4ac8da8f0933eae61e3b973e627c0c152ea4168c28cdc27066f9a5d54432f578")
+        -- add_patches("*", "patches/7.3p1/msys2-drive-name-in-path.patch", "903b3eee51e492a125cab9c724ad967450307d53e457f025e4432b81cb145af5")
+        -- add_patches("*", "patches/7.3p1/msys2-setkey.patch", "25079cf4a10c1ab70d60302bccaabee513762520dffd7c35285f7aae3ea36087")
+        -- add_patches("*", "patches/7.3p1/msys2.patch", "4ac8da8f0933eae61e3b973e627c0c152ea4168c28cdc27066f9a5d54432f578")
     end
 
     on_load(function (package)
@@ -77,11 +77,11 @@ package("openssh")
         end
 
         if package:config("privsep_path") == nil then
-            package:config_set("privsep_path", package:installdir("var/empty"))
+            package:config_set("privsep_path", package:installdir("var/empty"):gsub("\\", "/"))
         end
     end)
 
-    on_install("!windows and !wasm", function (package)
+    on_install("linux", "bsd", "macosx", "mingw", "msys", "cygwin", function (package)
         local configs = {}
 
         local features_enabled_by_default = {
@@ -121,15 +121,15 @@ package("openssh")
         if libcrypto == "builtin" then
             table.insert(configs, "--without-openssl")
         else
-            table.insert(configs, ("--with-ssl-dir=%s"):format(package:dep(libcrypto):installdir()))
+            table.insert(configs, ("--with-ssl-dir=%s"):format(package:dep(libcrypto):installdir():gsub("\\", "/")))
         end
 
         if package:config("zlib") then
-            table.insert(configs, ("--with-zlib=%s"):format(package:dep("zlib"):installdir()))
+            table.insert(configs, ("--with-zlib=%s"):format(package:dep("zlib"):installdir():gsub("\\", "/")))
         end
 
         if package:config("kerberos5") then
-            table.insert(configs, ("--with-kerberos5=%s"):format(package:dep("krb5"):installdir()))
+            table.insert(configs, ("--with-kerberos5=%s"):format(package:dep("krb5"):installdir():gsub("\\", "/")))
         end
 
         if package:config("ip4in6") then
