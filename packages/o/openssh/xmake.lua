@@ -141,6 +141,11 @@ package("openssh")
             table.insert(ldflags, "-pthread")
         end
 
+        -- fix openssl syslinks on windows.
+        if package:is_plat("mingw", "msys", "cygwin") then
+            table.insert(ldflags, "-ladvapi32 -lcrypt32 -luser32 -lws2_32")
+        end
+
         import("package.tools.autoconf").install(package, configs, {ldflags = ldflags})
     end)
 
