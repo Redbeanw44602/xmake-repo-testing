@@ -53,7 +53,7 @@ package("openssh")
     add_configs("ip4in6",                  {description = "Check for and convert IPv4 in IPv6 mapped addresses.", type = "boolean", default = nil})
     add_configs("bsd_auth",                {description = "Enable BSD auth support.", type = "boolean", default = nil})
     add_configs("pid_dir",                 {description = "Specify location of sshd.pid file.", type = "string", default = nil})
-    add_configs("lastlog",                 {description = "Specify lastlog location common locations.", type = "string", default = nil})
+    add_configs("lastlog_dir",                 {description = "Specify lastlog location common locations.", type = "string", default = nil})
 
     if is_plat("msys") then
         -- from: https://github.com/msys2/MSYS2-packages/tree/master/openssh
@@ -74,6 +74,10 @@ package("openssh")
 
         if package:config("kerberos5") then
             package:add("deps", "krb5")
+        end
+
+        if package:config("privsep_path") == nil then
+            package:config_set("privsep_path", package:installdir("var/empty"))
         end
     end)
 
@@ -98,7 +102,7 @@ package("openssh")
         local packages_string = {
             "prngd-socket", "pam-service", "privsep-user",
             "sandbox", "privsep-path", "xauth", "default-path", 
-            "superuser-path", "pid-dir", "lastlog"
+            "superuser-path", "pid-dir"
         }
         for _, package_boolean in ipairs(packages_boolean) do
             local value = package:config(package_boolean:gsub("-", "_"))
@@ -133,6 +137,9 @@ package("openssh")
         end
         if package:config("prngd_port") then
             table.insert(configs, "--with-prngd-port=" .. tostring(package:config("prngd_port")))
+        end
+        if package:config("lastlog_dir") then
+            table.insert(configs, "--with-lastlog=" .. package:config("lastlog"))
         end
 
         import("package.tools.autoconf").install(package, configs)
