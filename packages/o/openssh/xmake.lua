@@ -82,7 +82,7 @@ package("openssh")
         end
     end)
 
-    on_install("linux", "bsd", "macosx", "mingw@msys", "cygwin", function (package)
+    on_install("linux", "bsd", "macosx", "mingw", "msys", "cygwin", function (package)
         import("package.tools.autoconf")
 
         local configs = {}
