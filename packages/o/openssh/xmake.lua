@@ -55,6 +55,14 @@ package("openssh")
     add_configs("pid_dir",                 {description = "Specify location of sshd.pid file.", type = "string", default = nil})
     add_configs("lastlog_dir",             {description = "Specify lastlog location common locations.", type = "string", default = nil})
 
+    -- patches from: https://github.com/msys2/MSYS2-packages/tree/master/openssh
+    if is_plat("msys", "mingw") then
+        add_deps("autotools")
+        add_patches("*", "patches/7.3p1/msys2-drive-name-in-path.patch", "903b3eee51e492a125cab9c724ad967450307d53e457f025e4432b81cb145af5")
+        add_patches("*", "patches/7.3p1/msys2-setkey.patch", "25079cf4a10c1ab70d60302bccaabee513762520dffd7c35285f7aae3ea36087")
+        add_patches("*", "patches/7.3p1/msys2.patch", "4ac8da8f0933eae61e3b973e627c0c152ea4168c28cdc27066f9a5d54432f578")
+    end
+
     on_load(function (package)
         local libcrypto = package:config("libcrypto")
         if libcrypto ~= "builtin" then
@@ -74,7 +82,9 @@ package("openssh")
         end
     end)
 
-    on_install("linux", "bsd", "macosx", function (package)
+    on_install("linux", "bsd", "macosx", "msys", "cygwin", function (package)
+        import("package.tools.autoconf")
+
         local configs = {}
         local ldflags = {}
 
@@ -141,7 +151,16 @@ package("openssh")
             table.insert(ldflags, "-pthread")
         end
 
-        import("package.tools.autoconf").install(package, configs, {ldflags = ldflags})
+        local envs = autoconf.buildenvs(package, {ldflags = ldflags})
+
+        -- @see https://github.com/msys2/MSYS2-packages/blob/master/openssh/PKGBUILD
+        if package:is_plat("msys") then
+            os.rm("configure")
+            envs.MSYSTEM = "CYGWIN"
+            envs.ac_cv_func_setproctitle = "no"
+        end
+
+        autoconf.install(package, configs, {envs = envs})
     end)
 
     on_test(function (package)
