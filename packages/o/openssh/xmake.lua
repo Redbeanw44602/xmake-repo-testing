@@ -58,9 +58,9 @@ package("openssh")
     -- patches from: https://github.com/msys2/MSYS2-packages/tree/master/openssh
     if is_plat("msys", "mingw") then
         add_deps("autotools")
-        add_patches("*", "patches/7.3p1/msys2-drive-name-in-path.patch", "903b3eee51e492a125cab9c724ad967450307d53e457f025e4432b81cb145af5")
-        add_patches("*", "patches/7.3p1/msys2-setkey.patch", "25079cf4a10c1ab70d60302bccaabee513762520dffd7c35285f7aae3ea36087")
-        add_patches("*", "patches/7.3p1/msys2.patch", "4ac8da8f0933eae61e3b973e627c0c152ea4168c28cdc27066f9a5d54432f578")
+        add_patches("*", "patches/8.9p1/msys2-drive-name-in-path.patch", "903b3eee51e492a125cab9c724ad967450307d53e457f025e4432b81cb145af5")
+        add_patches("*", "patches/8.9p1/msys2-setkey.patch", "24dacf56b359f9fef584fbf50e7d7993e73bac52dbe8a0ff5e5f13071a22bb42")
+        add_patches("*", "patches/8.9p1/msys2.patch", "3fb221882d0cb8554c641a4c7a6684badc98329a8a17dbc42e64594037e5d128")
     end
 
     on_load(function (package)
@@ -82,7 +82,7 @@ package("openssh")
         end
     end)
 
-    on_install("linux", "bsd", "macosx", "mingw", "msys", "cygwin", function (package)
+    on_install("linux", "bsd", "macosx", "msys", "cygwin", function (package)
         import("package.tools.autoconf")
 
         local configs = {}
@@ -158,6 +158,7 @@ package("openssh")
             os.rm("configure")
             envs.MSYSTEM = "CYGWIN"
             envs.ac_cv_func_setproctitle = "no"
+            table.insert(configs, "--build=" .. os.getenv("MINGW_CHOST"))
         end
 
         autoconf.install(package, configs, {envs = envs})
