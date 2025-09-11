@@ -54,6 +54,13 @@ package("openssh")
     add_configs("bsd_auth",                {description = "Enable BSD auth support.", type = "boolean", default = nil})
     add_configs("pid_dir",                 {description = "Specify location of sshd.pid file.", type = "string", default = nil})
     add_configs("lastlog_dir",             {description = "Specify lastlog location common locations.", type = "string", default = nil})
+    
+    if is_plat("msys", "mingw") then
+        add_deps("autotools")
+        add_patches("*", "patches/7.3p1/msys2-drive-name-in-path.patch", "903b3eee51e492a125cab9c724ad967450307d53e457f025e4432b81cb145af5")
+        add_patches("*", "patches/7.3p1/msys2-setkey.patch", "25079cf4a10c1ab70d60302bccaabee513762520dffd7c35285f7aae3ea36087")
+        add_patches("*", "patches/7.3p1/msys2", "4ac8da8f0933eae61e3b973e627c0c152ea4168c28cdc27066f9a5d54432f578")
+    end
 
     on_load(function (package)
         local libcrypto = package:config("libcrypto")
@@ -142,8 +149,9 @@ package("openssh")
         end
 
         -- fix openssl syslinks on windows.
-        if package:is_plat("mingw", "msys", "cygwin") then
+        if package:is_plat("mingw", "msys") then
             io.replace("configure", "-lcrypto", "-lcrypto -ladvapi32 -lcrypt32 -luser32 -lws2_32", {plain = true})
+            io.replace("m4/openssh.m4", "#include <sys/socket.h>", "#include <winsock2.h>", {plain = true})
         end
 
         import("package.tools.autoconf").install(package, configs, {ldflags = ldflags})
