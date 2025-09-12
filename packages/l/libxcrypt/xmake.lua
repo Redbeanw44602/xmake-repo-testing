@@ -15,7 +15,7 @@ package("libxcrypt")
     add_configs("hashes",              {description = "Select the hashing method to enable.", default = "all", type = "string"})
     add_configs("year2038",            {description = "Enable support for timestamps after 2038.", default = true, type = "boolean"})
 
-    on_install(function (package)
+    on_install("linux", "bsd", "macosx", "mingw", "msys", "cygwin", function (package)
         local configs = {
             "--disable-dependency-tracking"
         }
@@ -38,9 +38,11 @@ package("libxcrypt")
         table.insert(configs, "--enable-obsolete-api=" .. obsolete_api)
         table.insert(configs, "--enable-hashes=" .. package:config("hashes"))
 
+        io.replace("configure", "-Wpedantic", "", {plain = true})
+
         import("package.tools.autoconf").install(package, configs)
     end)
 
     on_test(function (package)
-        -- assert(package:has_cfuncs("hashcat_init", {includes = {"hashcat/types.h", "hashcat/hashcat.h"}}))
+        assert(package:has_cfuncs("crypt", {includes = {"crypt.h"}}))
     end)
