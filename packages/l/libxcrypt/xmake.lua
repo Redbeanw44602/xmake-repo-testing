@@ -15,11 +15,6 @@ package("libxcrypt")
     add_configs("hashes",              {description = "Select the hashing method to enable.", default = "all", type = "string"})
     add_configs("year2038",            {description = "Enable support for timestamps after 2038.", default = true, type = "boolean"})
 
-    -- from: https://github.com/msys2/MSYS2-packages/blob/master/libxcrypt
-    if is_plat("mingw", "msys", "cygwin") then
-        add_patches("*", "patches/cygwin-no-undefined.patch", "3374a1d52855ab29ab82e5036475c42fc61806a4ddbacd87d00ae86b88ca1efb")
-    end
-
     on_install("linux", "bsd", "macosx", "mingw", "msys", "cygwin", function (package)
         local configs = {
             "--disable-dependency-tracking"
@@ -45,6 +40,8 @@ package("libxcrypt")
 
         if package:is_plat("mingw", "msys", "cygwin") then
             io.replace("configure", "-Wpedantic", "", {plain = true})
+            io.replace("Makefile.in", "libcrypt_la_LDFLAGS = -version-info", "libcrypt_la_LDFLAGS = -no-undefined -version-info", {plain = true})
+            table.insert(configs, "--enable-werror=no")
         end
 
         import("package.tools.autoconf").install(package, configs)
