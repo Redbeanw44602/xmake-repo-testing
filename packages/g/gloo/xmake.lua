@@ -7,6 +7,7 @@ package("gloo")
 
     add_versions("2025.07.29", "1dbd7e931568a5e3d6da16c0f2058f0606039640")
 
+    add_configs("mpi", {description = "Build mpi transport.", default = false, type = "boolean"})
     if not is_plat("windows") then
         add_configs("redis", {description = "Support using Redis for rendezvous.", default = false, type = "boolean"})
         add_configs("libuv", {description = "Build libuv transport.", default = false, type = "boolean"})
@@ -39,6 +40,9 @@ package("gloo")
         if package:config("openssl_dynlink") or package:config("openssl_dynload") then
             package:add("deps", "openssl")
         end
+        if package:config("mpi") then
+            package:add("deps", "mpich")
+        end
     end)
 
     on_install("!windows and !mingw", function (package)
@@ -47,6 +51,7 @@ package("gloo")
         table.insert(configs, "-DBUILD_SHARED_LIBS=" .. (package:config("shared") and "ON" or "OFF"))
         table.insert(configs, "-DUSE_REDIS=" .. (package:config("redis") and "ON" or "OFF"))
         table.insert(configs, "-DUSE_LIBUV=" .. (package:config("libuv") and "ON" or "OFF"))
+        table.insert(configs, "-DUSE_MPI=" .. (package:config("mpi") and "ON" or "OFF"))
         if package:config("openssl_dynlink") then
             table.insert(configs, "-DUSE_TCP_OPENSSL_LINK=ON")
         elseif package:config("openssl_dynload") then
