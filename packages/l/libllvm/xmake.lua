@@ -23,7 +23,7 @@ package("libllvm")
         -- pre-built
         if is_arch("x64") then
             add_urls("https://github.com/xmake-mirror/llvm-windows/releases/download/$(version)/clang+llvm-$(version)-win64.zip")
-            add_versions("19.1.7", "c6e058c6012f499811caa1ec037cc1b5c2fd2f8c20cc3315cae602cbd6c81a5e")
+            add_versions("20.1.0", "c1499f57716a5c7b84dfdfd712eb25ce0be4e6038ea7ea759c21ad9cafa4f73b")
         end
 
         -- The LLVM shared library cannot be built under windows.
@@ -36,8 +36,8 @@ package("libllvm")
         -- self-built
         add_urls("https://github.com/llvm/llvm-project/releases/download/llvmorg-$(version)/llvm-project-$(version).src.tar.xz", {alias = "tarball"})
         add_urls("https://github.com/llvm/llvm-project.git", {alias = "git"})
-        add_versions("tarball:19.1.7", "82401fea7b79d0078043f7598b835284d6650a75b93e64b6f761ea7b63097501")
-        add_versions("git:19.1.7", "llvmorg-19.1.7")
+        add_versions("tarball:20.1.0", "4579051e3c255fb4bb795d54324f5a7f3ef79bd9181e44293d7ee9a7f62aad9a")
+        add_versions("git:20.1.0", "llvmorg-20.1.0")
 
         add_deps("ninja")
         add_deps("zlib", "zstd", {optional = true})
