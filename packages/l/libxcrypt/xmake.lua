@@ -15,6 +15,10 @@ package("libxcrypt")
     add_configs("hashes",              {description = "Select the hashing method to enable.", default = "all", type = "string"})
     add_configs("year2038",            {description = "Enable support for timestamps after 2038.", default = true, type = "boolean"})
 
+    on_load("mingw", "msys", "cygwin", function (package)
+        package:config_set("symvers", false)
+    end)
+
     on_install("linux", "bsd", "macosx", "mingw", "msys", "cygwin", function (package)
         local configs = {
             "--disable-dependency-tracking"
