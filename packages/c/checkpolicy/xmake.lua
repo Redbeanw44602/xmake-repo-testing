@@ -22,6 +22,7 @@ package("checkpolicy")
 
         table.insert(configs, "DEBUG=" .. (package:is_debug() and "1" or "0"))
         table.insert(configs, "DESTDIR=" .. package:installdir())
+        table.insert(configs, "LEX=" .. package:dep("flex"):installdir("bin/flex"))
 
         local envs = make.buildenvs(package)
         local cflags = {}
