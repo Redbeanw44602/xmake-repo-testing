@@ -23,20 +23,17 @@ package("openldap")
         local configs = {
             "--without-systemd"
         }
-        table.insert(configs, "--enable-shared=" .. (package:config("shared") and "yes" or "no"))
-        table.insert(configs, "--enable-static=" .. (package:config("shared") and "no" or "yes"))
+
         table.insert(configs, "--with-tls=" .. package:config("tls"))
         table.insert(configs, "--with-cyrus-sasl=" .. (package:config("sasl") and "yes" or "no"))
-        if package:config("pic") ~= false then
-            table.insert(configs, "--with-pic")
-        end
-        local cppflags = {}
+
+        local cxflags = {}
         local ldflags = {}
         for _, dep in ipairs(package:orderdeps()) do
             local fetchinfo = dep:fetch()
             if fetchinfo then
                 for _, includedir in ipairs(fetchinfo.includedirs or fetchinfo.sysincludedirs) do
-                    table.insert(cppflags, "-I" .. includedir)
+                    table.insert(cxflags, "-I" .. includedir)
                 end
                 for _, linkdir in ipairs(fetchinfo.linkdirs) do
                     table.insert(ldflags, "-L" .. linkdir)
@@ -46,7 +43,10 @@ package("openldap")
                 end
             end
         end
-        import("package.tools.autoconf").install(package, configs, {cppflags = cppflags, ldflags = ldflags})
+
+        io.replace("Makefile.in", "tests doc", "", {plain = true})
+
+        import("package.tools.autoconf").install(package, configs, {cxflags = cxflags, ldflags = ldflags})
     end)
 
     on_test(function (package)
