@@ -1,7 +1,6 @@
 package("libselinux")
     set_homepage("https://github.com/SELinuxProject/selinux")
     set_description("SELinux library and simple utilities.")
-    set_license("LGPL-2.1")
 
     add_urls("https://github.com/SELinuxProject/selinux/releases/download/$(version)/libselinux-$(version).tar.gz")
     add_versions("3.9", "e7ee2c01dba64a0c35c9d7c9c0e06209d8186b325b0638a0d83f915cc3c101e8")
@@ -33,10 +32,10 @@ package("libselinux")
         table.insert(configs, "DEBUG=" .. (package:is_debug() and "1" or "0"))
         table.insert(configs, "DESTDIR=" .. package:installdir())
 
-        table.insert(configs, "DISABLE_SETRANS=" .. (package:config("setrans") and "y" or "n"))
-        table.insert(configs, "DISABLE_RPM=" .. (package:config("rpm") and "y" or "n"))
-        table.insert(configs, "DISABLE_BOOL=" .. (package:config("bool") and "y" or "n"))
-        table.insert(configs, "DISABLE_X11=" .. (package:config("x11") and "y" or "n"))
+        table.insert(configs, "DISABLE_SETRANS=" .. (package:config("setrans") and "n" or "y"))
+        table.insert(configs, "DISABLE_RPM=" .. (package:config("rpm") and "n" or "y"))
+        table.insert(configs, "DISABLE_BOOL=" .. (package:config("bool") and "n" or "y"))
+        table.insert(configs, "DISABLE_X11=" .. (package:config("x11") and "n" or "y"))
 
         table.insert(configs, "USE_PCRE2=" .. (package:config("pcre2") and "y" or "n"))
         table.insert(configs, "USE_LFS=" .. (package:config("lfs") and "y" or "n"))
