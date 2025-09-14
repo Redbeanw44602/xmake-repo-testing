@@ -21,6 +21,9 @@ package("audit")
 
     add_deps("autotools")
     on_load(function (package)
+        if package:config("zos_remote") then
+            package:add("deps", "openldap")
+        end
         if package:config("gssapi_krb5") then
             package:add("deps", "krb5")
         end
