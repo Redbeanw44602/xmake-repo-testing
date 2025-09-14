@@ -6,6 +6,7 @@ package("policycoreutils")
     add_urls("https://github.com/SELinuxProject/selinux/releases/download/$(version)/policycoreutils-$(version).tar.gz")
     add_versions("3.9", "44a294139876cf4c7969cb6a75d1932cb42543d74a7661760ded44a20bf7ebe8")
 
+    add_deps("gettext") -- msgfmt
     on_load(function (package)
         package:add("deps", "libsemanage >=" .. package:version_str())
     end)

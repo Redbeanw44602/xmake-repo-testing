@@ -39,6 +39,7 @@ package("secilc")
         envs.LDFLAGS = envs.LDFLAGS .. " " .. table.concat(ldflags, " ")
 
         io.replace("Makefile", "$(SECIL2TREE) man", "$(SECIL2TREE)", {plain = true})
+        io.replace("Makefile", "install: all man", "install: all", {plain = true})
         io.replace("Makefile", "-mkdir -p $(DESTDIR)$(MANDIR)/man8", "", {plain = true})
         io.replace("Makefile", [[	install -m 644 $(SECILC_MANPAGE) $(DESTDIR)$(MANDIR)/man8
 	install -m 644 $(SECIL2CONF_MANPAGE) $(DESTDIR)$(MANDIR)/man8
