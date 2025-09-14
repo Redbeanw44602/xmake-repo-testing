@@ -8,7 +8,7 @@ package("libsemanage")
 
     add_configs("utils", {description = "Build utilities.", default = true, type = "boolean"})
 
-    add_deps("bzip2", "audit")
+    add_deps("flex", "bzip2", "audit")
     on_load(function (package)
         package:add("deps", "libselinux >=" .. package:version_str())
     end)

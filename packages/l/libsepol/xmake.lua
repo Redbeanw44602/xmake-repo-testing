@@ -19,6 +19,10 @@ package("libsepol")
         table.insert(configs, "DEBUG=" .. (package:is_debug() and "1" or "0"))
         table.insert(configs, "DESTDIR=" .. package:installdir())
 
+        if package:config("cil") then
+            package:add("deps", "flex")
+        end
+
         table.insert(configs, "DISABLE_SHARED=" .. (package:config("shared") and "n" or "y"))
         if package:config("shared") then
             io.replace("src/Makefile", "all: $(LIBA)", "all:", {plain = true})
