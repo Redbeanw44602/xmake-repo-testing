@@ -27,13 +27,13 @@ package("openldap")
         table.insert(configs, "--with-tls=" .. package:config("tls"))
         table.insert(configs, "--with-cyrus-sasl=" .. (package:config("sasl") and "yes" or "no"))
 
-        local cxflags = {}
+        local cppflags = {}
         local ldflags = {}
         for _, dep in ipairs(package:orderdeps()) do
             local fetchinfo = dep:fetch()
             if fetchinfo then
                 for _, includedir in ipairs(fetchinfo.includedirs or fetchinfo.sysincludedirs) do
-                    table.insert(cxflags, "-I" .. includedir)
+                    table.insert(cppflags, "-I" .. includedir)
                 end
                 for _, linkdir in ipairs(fetchinfo.linkdirs) do
                     table.insert(ldflags, "-L" .. linkdir)
@@ -46,7 +46,7 @@ package("openldap")
 
         io.replace("Makefile.in", "tests doc", "", {plain = true})
 
-        import("package.tools.autoconf").install(package, configs, {cxflags = cxflags, ldflags = ldflags})
+        import("package.tools.autoconf").install(package, configs, {cppflags = cppflags, ldflags = ldflags})
     end)
 
     on_test(function (package)
