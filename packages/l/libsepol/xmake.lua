@@ -9,6 +9,12 @@ package("libsepol")
     add_configs("cil",   {description = "Build with CIL support.", default = false, type = "boolean"})
     add_configs("utils", {description = "Build utilities.", default = true, type = "boolean"})
 
+    on_load(function (package)
+        if package:config("cil") then
+            package:add("deps", "flex")
+        end
+    end)
+
     on_install("linux", function (package)
         import("package.tools.make")
 
@@ -18,10 +24,6 @@ package("libsepol")
 
         table.insert(configs, "DEBUG=" .. (package:is_debug() and "1" or "0"))
         table.insert(configs, "DESTDIR=" .. package:installdir())
-
-        if package:config("cil") then
-            package:add("deps", "flex")
-        end
 
         table.insert(configs, "DISABLE_SHARED=" .. (package:config("shared") and "n" or "y"))
         if package:config("shared") then
