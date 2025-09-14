@@ -72,6 +72,10 @@ package("libselinux")
             end
         end
 
+        if package:config("pic") then
+            table.insert(cflags, "-fPIC")
+        end
+
         envs.CFLAGS = envs.CFLAGS .. " " .. table.concat(cflags, " ")
         envs.LDFLAGS = envs.LDFLAGS .. " " .. table.concat(ldflags, " ")
 

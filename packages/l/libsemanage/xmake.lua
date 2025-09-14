@@ -53,6 +53,19 @@ package("libsemanage")
             end
         end
 
+        if package:config("pic") then
+            table.insert(cflags, "-fPIC")
+        end
+
+        local links_missing_in_cascading = ""
+        if package:dep("audit"):config("libcap_ng") then
+            links_missing_in_cascading = links_missing_in_cascading .. " -lcap-ng"
+        end
+        if package:dep("libselinux"):config("pcre2") then
+            links_missing_in_cascading = links_missing_in_cascading .. " -lpcre2-8"
+        end
+        io.replace("src/Makefile", "-lselinux", "-lselinux" .. links_missing_in_cascading, {plain = true})
+
         envs.CFLAGS = envs.CFLAGS .. " " .. table.concat(cflags, " ")
         envs.LDFLAGS = envs.LDFLAGS .. " " .. table.concat(ldflags, " ")
 

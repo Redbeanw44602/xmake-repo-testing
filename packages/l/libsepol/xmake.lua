@@ -6,7 +6,7 @@ package("libsepol")
     add_urls("https://github.com/SELinuxProject/selinux/releases/download/$(version)/libsepol-$(version).tar.gz")
     add_versions("3.9", "ba630b59e50c5fbf9e9dd45eb3734f373cf78d689d8c10c537114c9bd769fa2e")
 
-    add_configs("cil",   {description = "Build with CIL support.", default = false, type = "boolean"})
+    add_configs("cil",   {description = "Build with CIL support.", default = true, type = "boolean"})
     add_configs("utils", {description = "Build utilities.", default = true, type = "boolean"})
 
     on_load(function (package)
@@ -42,10 +42,17 @@ package("libsepol")
         -- fix pkg-config
         io.replace("src/Makefile", ":@prefix@:$(PREFIX):", ":@prefix@:$(DESTDIR):", {plain = true})
 
-        make.build(package, configs)
+        local envs = make.buildenvs(package)
+        local cflags = {}
+        if package:config("pic") then
+            table.insert(cflags, "-fPIC")
+        end
+        envs.CFLAGS = envs.CFLAGS .. " " .. table.concat(cflags, " ")
+
+        make.build(package, configs, {envs = envs})
 
         table.insert(configs, "install")
-        make.make(package, configs)
+        make.make(package, configs, {envs = envs})
     end)
 
     on_test(function (package)
