@@ -3,7 +3,6 @@ package("openldap")
     set_description("OpenLDAP Software is an open source implementation of the Lightweight Directory Access Protocol.")
 
     add_urls("https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-$(version).tgz")
-    add_versions("2.5.7", "ea9757001bc36295037f0030ede16810a1bb7438bbe8f871a35cc2a2b439d9ab")
     add_versions("2.6.9", "2cb7dc73e9c8340dff0d99357fbaa578abf30cc6619f0521972c555681e6b2ff")
 
     add_configs("tls", {description = "Set TLS/SSL support library.", default = "openssl", type = "string", values = {"openssl", "gnutls"}})
