@@ -22,7 +22,6 @@ package("libsemanage")
 
         table.insert(configs, "DEBUG=" .. (package:is_debug() and "1" or "0"))
         table.insert(configs, "DESTDIR=" .. package:installdir())
-        table.insert(configs, "LEX=" .. package:dep("flex"):installdir("bin/flex"))
 
         table.insert(configs, "DISABLE_SHARED=" .. (package:config("shared") and "n" or "y"))
         if package:config("shared") then

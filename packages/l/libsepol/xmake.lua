@@ -24,7 +24,6 @@ package("libsepol")
 
         table.insert(configs, "DEBUG=" .. (package:is_debug() and "1" or "0"))
         table.insert(configs, "DESTDIR=" .. package:installdir())
-        table.insert(configs, "LEX=" .. package:dep("flex"):installdir("bin/flex"))
 
         table.insert(configs, "DISABLE_SHARED=" .. (package:config("shared") and "n" or "y"))
         if package:config("shared") then
@@ -32,7 +31,7 @@ package("libsepol")
             io.replace("src/Makefile", "install -m 644 $(LIBA) $(DESTDIR)$(LIBDIR)", "", {plain = true})
         end
 
-        table.insert(configs, "DISABLE_CIL=" .. (package:config("cil") and "y" or "n"))
+        table.insert(configs, "DISABLE_CIL=" .. (package:config("cil") and "n" or "y"))
         if not package:config("utils") then
             io.replace("Makefile", "$(MAKE) -C utils install", "", {plain = true})
             io.replace("Makefile", "$(MAKE) -C utils", "", {plain = true})
