@@ -6,7 +6,6 @@ package("libkmod")
     add_urls("https://github.com/kmod-project/kmod/archive/refs/tags/v$(version).tar.gz",
              "https://github.com/kmod-project/kmod.git")
 
-    add_versions("34", "cb47be49366b596e4554eeeb7595b128feb261619c7675603e004b07c5ebbd5b")
     add_versions("33", "c72120a2582ae240221671ddc1aa53ee522764806f50f8bf1522bbf055679985")
     add_versions("32", "9477fa096acfcddaa56c74b988045ad94ee0bac22e0c1caa84ba1b7d408da76e")
     add_versions("31", "16c40aaa50fc953035b4811b29ce3182f220e95f3c9e5eacb4b07b1abf85f003")
