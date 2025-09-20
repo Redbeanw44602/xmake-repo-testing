@@ -116,17 +116,6 @@ package("libsystemd")
 
         io.replace("src/shared/meson.build", "install : true,", "build_by_default : false,", {plain = true})
 
-        local packagedeps = {"libcap"}
-        if package:config("selinux") then
-            table.insert(packagedeps, "libselinux")
-        end
-        if package:config("p11kit") then
-            table.insert(packagedeps, "p11-kit")
-        end
-        if package:config("blkid") or package:config("libmount") then
-            table.insert(packagedeps, "util-linux")
-        end
-
         os.vrun("python -m pip install jinja2")
 
         import("package.tools.meson").install(package, configs, {packagedeps = packagedeps})
