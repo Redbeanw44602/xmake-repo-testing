@@ -36,10 +36,15 @@ jobs:
         run: |
           xmake l ./scripts/test.lua -vD -k ${{ matrix.kind }} -m ${{ matrix.mode }}
 
+      - name: Compress xmake home # To avoid "invalid characters include" problem...
+        if: failure()
+        run: |
+          tar -cJf xmake-home.tar.xz ~/.xmake
+
       - name: Upload xmake home
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: xmake-home-${{ matrix.os }}-${{ matrix.kind }}-${{ matrix.mode }}
           retention-days: 1
-          path: ~/.xmake
+          path: xmake-home.tar.xz

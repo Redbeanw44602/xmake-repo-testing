@@ -44,13 +44,18 @@ jobs:
         run: |
           xmake l ./scripts/test.lua -vD --toolchain=clang-20 -k ${{ matrix.kind }}
 
+      - name: Compress xmake home # To avoid "invalid characters include" problem...
+        if: failure()
+        run: |
+          tar -cJf xmake-home.tar.xz ~/.xmake
+
       - name: Upload xmake home
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: xmake-home-${{ matrix.os }}-${{ matrix.kind }}
           retention-days: 1
-          path: ~/.xmake
+          path: xmake-home.tar.xz
 
 #      - name: Setup upterm session
 #        if: failure()
