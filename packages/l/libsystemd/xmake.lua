@@ -122,14 +122,20 @@ package("libsystemd")
         if package:config("audit") then
             table.insert(packagedeps, "audit")
         end
-        if package:config("kmod") then
-            table.insert(packagedeps, "libkmod")
-        end
         if package:config("gcrypt") then
             table.insert(packagedeps, "libgcrypt")
+            table.insert(packagedeps, "libgpg-error")
         end
 
-        import("package.tools.meson").install(package, configs, {packagedeps = packagedeps})
+        local cflags = {}
+        if package:config("kmod") then
+            local info = package:dep("libkmod"):fetch()
+            for _, includedir in ipairs(info.includedirs or info.sysincludedirs) do
+                table.insert(cflags, "-I" .. includedir)
+            end
+        end
+
+        import("package.tools.meson").install(package, configs, {packagedeps = packagedeps, cflags = cflags})
     end)
 
     on_test(function (package)
