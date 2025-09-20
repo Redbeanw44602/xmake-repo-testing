@@ -64,7 +64,7 @@ package("libsystemd")
         if package:config("libmount") then
             util_linux_cfg.libmount = true
         end
-        if #util_linux_cfg > 0 then
+        if not table.empty(util_linux_cfg) then
             package:add("deps", "util-linux", {configs = util_linux_cfg})
         end
     end)
@@ -122,6 +122,9 @@ package("libsystemd")
         end
         if package:config("p11kit") then
             table.insert(packagedeps, "p11-kit")
+        end
+        if package:config("blkid") or package:config("libmount") then
+            table.insert(packagedeps, "util-linux")
         end
 
         os.vrun("python -m pip install jinja2")
