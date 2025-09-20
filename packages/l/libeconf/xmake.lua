@@ -8,7 +8,7 @@ package("libeconf")
 
     add_versions("v0.7.10", "e8fee300cbbae11287d2682d185d946a1ffbd23bf02b4f97d68f2df34d8de07f")
 
-    add_deps("meson")
+    add_deps("meson", "ninja")
     on_install("linux", function (package)
         io.replace("meson.build", "subdir%b()", "")
         io.replace("meson.build", "executable%b()", "")

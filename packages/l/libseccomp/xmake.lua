@@ -6,6 +6,7 @@ package("libseccomp")
 
     add_configs("tools", {description = "Build tools.", default = true, type = "boolean"})
 
+    add_deps("gperf")
     on_install("linux", function (package)
         local configs = {
             "--disable-dependency-tracking",
