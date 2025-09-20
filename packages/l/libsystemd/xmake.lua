@@ -118,7 +118,12 @@ package("libsystemd")
 
         os.vrun("python -m pip install jinja2")
 
-        import("package.tools.meson").install(package, configs, {packagedeps = {"libcap"}})
+        local packagedeps = {"libcap"}
+        if package:config("audit") then
+            table.insert(packagedeps, "audit")
+        end
+
+        import("package.tools.meson").install(package, configs, {packagedeps = packagedeps})
     end)
 
     on_test(function (package)

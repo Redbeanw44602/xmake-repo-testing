@@ -46,7 +46,7 @@ jobs:
       - name: Compress xmake home # To avoid "invalid characters include" problem...
         if: failure()
         run: |
-          tar -cJf xmake-home.tar.xz ~/.xmake
+          tar -czf xmake-home.tar.gz ~/.xmake
 
       - name: Upload xmake home
         if: failure()
@@ -54,4 +54,4 @@ jobs:
         with:
           name: xmake-home-${{ matrix.os }}-${{ matrix.kind }}
           retention-days: 1
-          path: xmake-home.tar.xz
+          path: xmake-home.tar.gz

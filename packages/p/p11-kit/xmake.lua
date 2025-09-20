@@ -34,7 +34,6 @@ package("p11-kit")
         local configs = {
             "-Dsystemd=disabled", 
             "-Dbash_completion=disabled",
-            "-Dzsh_completion=disabled",
             "-Dman=false",
             "-Dnls=false",
             "-Dtest=false"}
