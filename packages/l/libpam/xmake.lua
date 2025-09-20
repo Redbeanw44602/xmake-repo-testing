@@ -11,7 +11,7 @@ package("libpam")
     add_configs("audit", {description = "Enable audit support.", default = true, type = "boolean"})
     add_configs("econf", {description = "Enable libeconf support.", default = false, type = "boolean"})
 
-    add_deps("meson")
+    add_deps("meson", "ninja")
     on_load(function(package)
         if package:config("audit") then
             package:add("deps", "audit")

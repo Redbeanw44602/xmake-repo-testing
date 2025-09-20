@@ -41,3 +41,7 @@ jobs:
       - name: Tests
         run: |
           xmake l ./scripts/test.lua -vD --toolchain=clang-20 -k ${{ matrix.kind }}
+
+      - name: Dbghelp
+        if: failure()
+        uses: lhotari/action-upterm@v1

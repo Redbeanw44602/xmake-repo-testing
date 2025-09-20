@@ -116,7 +116,7 @@ package("libsystemd")
 
         io.replace("src/shared/meson.build", "install : true,", "build_by_default : false,", {plain = true})
 
-        local packagedeps = {}
+        local packagedeps = {"libcap"}
         if package:config("selinux") then
             table.insert(packagedeps, "libselinux")
         end
