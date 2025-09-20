@@ -122,6 +122,9 @@ package("libsystemd")
         if package:config("audit") then
             table.insert(packagedeps, "audit")
         end
+        if package:config("kmod") then
+            table.insert(packagedeps, "libkmod")
+        end
 
         import("package.tools.meson").install(package, configs, {packagedeps = packagedeps})
     end)
