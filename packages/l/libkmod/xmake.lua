@@ -17,6 +17,7 @@ package("libkmod")
     add_configs("zlib", {description = "Enable zlib support.", default = true, type = "boolean"})
     add_configs("xz", {description = "Enable xz support.", default = true, type = "boolean"})
 
+    add_includedirs("include", "include/libkmod")
     on_load(function (package)
         if package:config("zstd") then
             package:add("deps", "zstd")
