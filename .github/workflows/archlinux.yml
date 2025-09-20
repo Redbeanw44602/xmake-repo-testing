@@ -38,3 +38,12 @@ jobs:
           XMAKE_ROOT: y
         run: |
           xmake l ./scripts/test.lua -vD -k ${{ matrix.kind }}
+
+      - name: Upload xmake home
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xmake-home-${{ matrix.os }}-${{ matrix.kind }}
+          include-hidden-files: true
+          retention-days: 1
+          path: ~/.xmake

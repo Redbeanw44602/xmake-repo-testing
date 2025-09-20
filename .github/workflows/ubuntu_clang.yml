@@ -33,6 +33,8 @@ jobs:
 
       - name: Clang Toolchain Installation
         run: |
+          apt remove --purge 'llvm-*' 'clang-*'
+
           # https://apt.llvm.org/
           wget https://apt.llvm.org/llvm.sh
           chmod +x llvm.sh
@@ -42,9 +44,18 @@ jobs:
         run: |
           xmake l ./scripts/test.lua -vD --toolchain=clang-20 -k ${{ matrix.kind }}
 
-      - name: Setup upterm session
+      - name: Upload xmake home
         if: failure()
-        uses: owenthereal/action-upterm@v1
+        uses: actions/upload-artifact@v4
         with:
-          limit-access-to-actor: true
-          wait-timeout-minutes: 5
+          name: xmake-home-${{ matrix.os }}-${{ matrix.kind }}
+          include-hidden-files: true
+          retention-days: 1
+          path: ~/.xmake
+
+#      - name: Setup upterm session
+#        if: failure()
+#        uses: owenthereal/action-upterm@v1
+#        with:
+#          limit-access-to-actor: true
+#          wait-timeout-minutes: 5
