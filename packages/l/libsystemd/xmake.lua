@@ -125,6 +125,9 @@ package("libsystemd")
         if package:config("kmod") then
             table.insert(packagedeps, "libkmod")
         end
+        if package:config("gcrypt") then
+            table.insert(packagedeps, "libgcrypt")
+        end
 
         import("package.tools.meson").install(package, configs, {packagedeps = packagedeps})
     end)
