@@ -61,9 +61,8 @@ jobs:
           retention-days: 1
           path: ~/AppData/Local/.xmake
 
-      - name: Setup upterm session
+      - name: Setup tmate session
         if: failure()
-        uses: Redbeanw44602/action-upterm@main
+        uses: mxschmitt/action-tmate@v3
         with:
           limit-access-to-actor: true
-          wait-timeout-minutes: 5
