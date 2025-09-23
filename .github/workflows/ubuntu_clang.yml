@@ -59,7 +59,7 @@ jobs:
 
 #      - name: Setup upterm session
 #        if: failure()
-#        uses: Redbeanw44602/action-upterm@v1
+#        uses: Redbeanw44602/action-upterm@main
 #        with:
 #          limit-access-to-actor: true
 #          wait-timeout-minutes: 5
