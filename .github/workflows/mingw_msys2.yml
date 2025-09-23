@@ -60,3 +60,10 @@ jobs:
           include-hidden-files: true
           retention-days: 1
           path: ~/AppData/Local/.xmake
+
+      - name: Setup upterm session
+        if: failure()
+        uses: Redbeanw44602/action-upterm@v1
+        with:
+          limit-access-to-actor: true
+          wait-timeout-minutes: 5
