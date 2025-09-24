@@ -61,10 +61,16 @@ package("libkmod")
             table.insert(configs, "--with-xz=" .. (package:config("logging") and "yes" or "no"))
             table.insert(configs, "--with-openssl=" .. (package:config("logging") and "yes" or "no"))
 
+            local packagedeps = {}
+            for _, dep in ipairs(package:librarydeps()) do
+                table.insert(packagedeps, dep:name())
+            end
+
+
             io.replace("Makefile.am", [[dist_bashcompletion_DATA = \
 	shell-completion/bash/kmod]], "", {plain = true})
 
-            import("package.tools.autoconf").install(package, configs)
+            import("package.tools.autoconf").install(package, configs, {packagedeps = packagedeps})
         else
             local configs = {
                 "-Dbashcompletiondir=no",
