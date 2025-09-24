@@ -47,6 +47,9 @@ package("kenlm")
         if not package:dep("xz"):config("shared") then
             table.insert(opt.cxflags, "-DLZMA_API_STATIC")
         end
+        
+        opt.packagedeps = {"bzip2"}
+
         import("package.tools.cmake").install(package, configs, opt)
     end)
 
