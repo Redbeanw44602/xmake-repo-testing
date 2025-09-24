@@ -67,4 +67,4 @@ jobs:
         uses: mxschmitt/action-tmate@v3
         with:
           msys2-location: ${{ steps.setup-msys2.outputs.msys2-location }}
-          limit-access-to-actor: true
+          # limit-access-to-actor: true
