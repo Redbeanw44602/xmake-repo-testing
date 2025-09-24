@@ -3,45 +3,114 @@ package("libkmod")
     set_description("libkmod - Linux kernel module handling")
     set_license("LGPL-2.1")
 
-    add_urls("https://github.com/kmod-project/kmod/archive/refs/tags/v$(version).tar.gz",
+    add_urls("https://github.com/kmod-project/kmod/archive/refs/tags/$(version).tar.gz",
              "https://github.com/kmod-project/kmod.git")
 
-    add_versions("33", "c72120a2582ae240221671ddc1aa53ee522764806f50f8bf1522bbf055679985")
-    add_versions("32", "9477fa096acfcddaa56c74b988045ad94ee0bac22e0c1caa84ba1b7d408da76e")
-    add_versions("31", "16c40aaa50fc953035b4811b29ce3182f220e95f3c9e5eacb4b07b1abf85f003")
-    add_versions("30", "1fa3974abd80b992d61324bcc04fa65ea96cfe2e9e1150f48394833030c4b583")
+    add_versions("v34", "cb47be49366b596e4554eeeb7595b128feb261619c7675603e004b07c5ebbd5b")
+    add_versions("v33", "c72120a2582ae240221671ddc1aa53ee522764806f50f8bf1522bbf055679985")
+    add_versions("v32", "9477fa096acfcddaa56c74b988045ad94ee0bac22e0c1caa84ba1b7d408da76e")
+    add_versions("v31", "16c40aaa50fc953035b4811b29ce3182f220e95f3c9e5eacb4b07b1abf85f003")
+    add_versions("v30", "1fa3974abd80b992d61324bcc04fa65ea96cfe2e9e1150f48394833030c4b583")
 
-    add_patches(">=30 <33", path.join(os.scriptdir(), "patches", "31", "basename.patch"), "83d07e169882cc91f3af162912ae97cd4b62ff48876ca83b0317c40a388773ad")
+    -- "--enable-static" is not supported by kmod
+    add_configs("shared",  {description = "Build shared library", default = true, type = "boolean", readonly = true})
 
-    add_configs("zstd", {description = "Enable zstd support.", default = true, type = "boolean"})
-    add_configs("zlib", {description = "Enable zlib support.", default = true, type = "boolean"})
-    add_configs("xz", {description = "Enable xz support.", default = true, type = "boolean"})
+    add_configs("logging", {description = "Enable system logging.", default = true, type = "boolean"})
+    add_configs("zstd",    {description = "Enable Zstandard-compressed modules support.", default = true, type = "boolean"})
+    add_configs("zlib",    {description = "Enable gzipped modules support.", default = true, type = "boolean"})
+    add_configs("xz",      {description = "Enable Xz-compressed modules support.", default = true, type = "boolean"})
+    add_configs("openssl", {description = "Enable PKCS7 signatures support", default = "openssl3", values = {false, "openssl", "openssl3"}})
 
-    add_includedirs("include", "include/libkmod")
+    on_check("android", function (package)
+        -- bionic, fread_unlocked
+        if package:version():ge("v34") then
+            local ndk_sdkver = package:toolchain("ndk"):config("ndk_sdkver")
+            assert(ndk_sdkver and tonumber(ndk_sdkver) >= 28, "package(libkmod): require ndk api level >= 28")
+        end
+    end)
+
     on_load(function (package)
-        if package:config("zstd") then
-            package:add("deps", "zstd")
+        if package:version():lt("v34") then
+            package:add("deps", "autotools")
+        else
+            package:add("deps", "meson", "ninja")
         end
-        if package:config("zlib") then
-            package:add("deps", "zlib")
+
+        for _, lib in ipairs({"zstd", "zlib", "xz"}) do
+            if package:config(lib) then
+                package:add("deps", lib)
+            end
         end
-        if package:config("xz") then
-            package:add("deps", "xz")
+        local openssl = package:config("openssl")
+        if openssl then
+            package:add("deps", openssl)
         end
     end)
 
     on_install("linux", "android", function (package)
-        os.cp(path.join(package:scriptdir(), "port", "xmake.lua"), "xmake.lua")
-        os.cp(path.join(package:scriptdir(), "port", "config.h"), "config.h")
-        os.cp(path.join(package:scriptdir(), "port", "endian-darwin.h"), "endian-darwin.h")
-        import("package.tools.xmake").install(package, {
-            zstd = package:config("zstd"),
-            zlib = package:config("zlib"),
-            xz = package:config("xz"),
-            ver = package:version_str()
-        })
+        if package:is_plat("android") then
+            local ndk_sdkver = package:toolchain("ndk"):config("ndk_sdkver")
+            if tonumber(ndk_sdkver) < 23 then
+                io.replace("shared/util.h", "#include <time.h>", "#include <time.h>\n#include <libgen.h>", {plain = true})
+            end
+            io.replace("shared/util.h", "#include <time.h>", [[
+                #include <time.h>
+                #include <unistd.h>
+
+                // from https://android.googlesource.com/kernel/common/+/03c04a7cba972/tools/perf/util/get_current_dir_name.c
+                static inline char *get_current_dir_name(void)
+                {
+                    char pwd[PATH_MAX];
+                    return getcwd(pwd, sizeof(pwd)) == NULL ? NULL : strdup(pwd);
+                }
+            ]], {plain = true})
+        end
+
+        if package:version():lt("v34") then
+            local configs = {
+                "--disable-dependency-tracking",
+                "--disable-manpages",
+                "--disable-test-modules",
+                "--disable-tools"
+            }
+
+            table.insert(configs, "--enable-logging=" .. (package:config("logging") and "yes" or "no"))
+            table.insert(configs, "--with-zstd=" .. (package:config("zstd") and "yes" or "no"))
+            table.insert(configs, "--with-zlib=" .. (package:config("zlib") and "yes" or "no"))
+            table.insert(configs, "--with-xz=" .. (package:config("xz") and "yes" or "no"))
+            table.insert(configs, "--with-openssl=" .. (package:config("openssl") and "yes" or "no"))
+
+            local packagedeps = {}
+            for _, dep in ipairs(package:librarydeps()) do
+                table.insert(packagedeps, dep:name())
+            end
+
+            io.replace("Makefile.am", [[dist_bashcompletion_DATA = \
+	shell-completion/bash/kmod]], "", {plain = true})
+
+            import("package.tools.autoconf").install(package, configs, {packagedeps = packagedeps, makeconfigs = {LIBTOOLFLAGS = "--verbose"}})
+        else
+            local configs = {
+                "-Dbashcompletiondir=no",
+                "-Dfishcompletiondir=no",
+                "-Dzshcompletiondir=no",
+                "-Dmanpages=false",
+                "-Dtools=false"
+            }
+
+            table.insert(configs, "-Dlogging=" .. (package:config("logging") and "true" or "false"))
+
+            table.insert(configs, "-Dzstd=" .. (package:config("zstd") and "enabled" or "disabled"))
+            table.insert(configs, "-Dzlib=" .. (package:config("zlib") and "enabled" or "disabled"))
+            table.insert(configs, "-Dxz=" .. (package:config("xz") and "enabled" or "disabled"))
+            table.insert(configs, "-Dopenssl=" .. (package:config("openssl") and "enabled" or "disabled"))
+
+            io.replace("meson.build", "_tools = %[(.-)%]", "_tools = []")
+
+            import("package.tools.meson").install(package, configs)
+        end
     end)
 
     on_test(function (package)
-        assert(package:has_cfuncs("kmod_new", {includes = "libkmod/libkmod.h"}))
+        assert(package:has_cfuncs("kmod_new", {includes = "libkmod.h"}))
     end)
