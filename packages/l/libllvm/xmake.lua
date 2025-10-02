@@ -11,6 +11,9 @@ package("libllvm")
     add_configs("httplib", {description = "Enable cpp-httplib to support llvm-debuginfod serve debug information over HTTP.", default = false, type = "boolean"})
     add_configs("libcxx",  {description = "Use libc++ as C++ standard library instead of libstdc++", default = false, type = "boolean"})
 
+    add_configs("zlib", {description = "Enable zlib compression support.", default = true, type = "boolean"})
+    add_configs("zstd", {description = "Enable zstd compression support.", default = true, type = "boolean"})
+
     includes(path.join(os.scriptdir(), "constants.lua"))
     for _, project in ipairs(get_llvm_known_projects()) do
         add_configs(project:gsub("-", "_"), {description = "Build " .. project .. " project.", default = (project == "clang"), type = "boolean"})
@@ -20,29 +23,18 @@ package("libllvm")
     end
 
     if is_plat("windows") then
-        -- pre-built
-        if is_arch("x64") then
-            add_urls("https://github.com/xmake-mirror/llvm-windows/releases/download/$(version)/clang+llvm-$(version)-win64.zip")
-            add_versions("19.1.7", "c6e058c6012f499811caa1ec037cc1b5c2fd2f8c20cc3315cae602cbd6c81a5e")
-        end
-
         -- The LLVM shared library cannot be built under windows.
         add_configs("shared", {description = "Build shared library.", default = false, type = "boolean", readonly = true})
 
         add_configs("runtimes",   {description = "Set vs compiler runtime.", default = "MT", readonly = true})
         add_configs("vs_runtime", {description = "Set vs compiler runtime.", default = "MT", readonly = true})
         add_syslinks("psapi", "shell32", "ole32", "uuid", "advapi32", "ws2_32", "ntdll", "version")
-    else
-        -- self-built
-        add_urls("https://github.com/llvm/llvm-project/releases/download/llvmorg-$(version)/llvm-project-$(version).src.tar.xz", {alias = "tarball"})
-        add_urls("https://github.com/llvm/llvm-project.git", {alias = "git"})
-        add_versions("tarball:19.1.7", "82401fea7b79d0078043f7598b835284d6650a75b93e64b6f761ea7b63097501")
-        add_versions("git:19.1.7", "llvmorg-19.1.7")
-
-        add_deps("ninja")
-        add_deps("zlib", "zstd", {optional = true})
-        set_policy("package.cmake_generator.ninja", true)
     end
+
+    add_urls("https://github.com/llvm/llvm-project/releases/download/llvmorg-$(version)/llvm-project-$(version).src.tar.xz", {alias = "tarball"})
+    add_urls("https://github.com/llvm/llvm-project.git", {alias = "git"})
+    add_versions("tarball:19.1.7", "82401fea7b79d0078043f7598b835284d6650a75b93e64b6f761ea7b63097501")
+    add_versions("git:19.1.7", "llvmorg-19.1.7")
 
     -- workaround to fix "error: undefined symbol: __mulodi4" (armeabi-v7a, r22, windows)
     if is_plat("android") then
@@ -54,9 +46,18 @@ package("libllvm")
         add_syslinks("execinfo")
     end
 
-    add_deps("cmake")
+    set_policy("package.cmake_generator.ninja", true)
+
+    add_deps("cmake", "ninja")
     on_load(function (package)
         local constants = import('constants')
+
+        if package:config("zlib") then
+            package:add("deps", "zlib")
+        end
+        if package:config("zstd") then
+            package:add("deps", "zstd")
+        end
         
         -- add deps.
         if not package:is_plat("windows") then -- not prebuilt
@@ -92,11 +93,7 @@ package("libllvm")
 
     end)
 
-    on_install("windows|x64", function (package)
-        os.cp("*", package:installdir())
-    end)
-
-    on_install("linux", "macosx", "bsd", "android", "iphoneos", "cross", function (package)
+    on_install("linux", "macosx", "bsd", "android", "windows", "iphoneos", "cross", function (package)
         local constants = import('constants')
 
         local projects_enabled = {}
@@ -133,7 +130,6 @@ package("libllvm")
             "-DFLANG_BUILD_TOOLS=OFF",
             "-DLLD_BUILD_TOOLS=OFF"
         }
-        table.insert(configs, "-DCMAKE_BUILD_TYPE=" .. (package:is_debug() and "Debug" or "Release"))
         table.insert(configs, "-DLLVM_BUILD_LLVM_DYLIB=" .. (package:config("shared") and "ON" or "OFF"))
         table.insert(configs, "-DLLVM_ENABLE_EH=" .. (package:config("exception") and "ON" or "OFF"))
         table.insert(configs, "-DLLVM_ENABLE_RTTI=" .. (package:config("rtti") and "ON" or "OFF"))
@@ -190,26 +186,6 @@ package("libllvm")
             -- LLVM build systems mostly use "Darwin", not if(APPLE)
             table.insert(configs, "-DCMAKE_SYSTEM_NAME=Darwin")
         end
-
-        function tryadd_dep(depname, varname)
-            varname = varname or depname
-            local dep = package:dep(depname)
-            if dep and not dep:is_system() then
-                local fetchinfo = dep:fetch({external = false})
-                if fetchinfo then
-                    local includedirs = fetchinfo.includedirs or fetchinfo.sysincludedirs
-                    if includedirs and #includedirs > 0 then
-                        table.insert(configs, "-D" .. varname .. "_INCLUDE_DIR=" .. table.concat(includedirs, " "):gsub("\\", "/"))
-                    end
-                    local libfiles = fetchinfo.libfiles
-                    if libfiles then
-                        table.insert(configs, "-D" .. varname .. "_LIBRARY=" .. table.concat(libfiles, " "):gsub("\\", "/"))
-                    end
-                end
-            end
-        end
-        tryadd_dep("zlib", "ZLIB")
-        tryadd_dep("zstd")
 
         os.cd("llvm")
         import("package.tools.cmake").install(package, configs)
