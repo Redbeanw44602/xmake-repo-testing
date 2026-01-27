@@ -54,6 +54,10 @@ package("cpptrace")
         end
 
         io.replace("CMakeLists.txt", "/WX", "", {plain = true})
+        io.replace("CMakeLists.txt", "target_include_directories(${target_name} PRIVATE ${LIBDWARF_INCLUDE_DIRS})", [[
+            target_include_directories(${target_name} PRIVATE ${LIBDWARF_INCLUDE_DIRS})
+            target_link_directories(${target_name} PRIVATE ${LIBDWARF_LIBRARY_DIRS})
+        ]], {plain = true})
 
         local configs = {
             "-DBUILD_TESTING=OFF",
