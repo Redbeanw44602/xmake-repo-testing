@@ -53,11 +53,16 @@ package("cpptrace")
             package:add("defines", "CPPTRACE_STATIC_DEFINE")
         end
 
+        local cxflags = {}
+
         io.replace("CMakeLists.txt", "/WX", "", {plain = true})
         io.replace("CMakeLists.txt", "target_include_directories(${target_name} PRIVATE ${LIBDWARF_INCLUDE_DIRS})", [[
             target_include_directories(${target_name} PRIVATE ${LIBDWARF_INCLUDE_DIRS})
             target_link_directories(${target_name} PRIVATE ${LIBDWARF_LIBRARY_DIRS})
         ]], {plain = true})
+        if is_plat("mingw") and not package:dep("libdwarf"):config("shared") then
+            table.insert(cxflags, "-DLIBDWARF_STATIC=1")
+        end
 
         local configs = {
             "-DBUILD_TESTING=OFF",
@@ -68,7 +73,7 @@ package("cpptrace")
         table.insert(configs, "-DCPPTRACE_UNWIND_WITH_LIBUNWIND=" .. (package:config("libunwind") and "ON" or "OFF"))
         table.insert(configs, "-DCMAKE_BUILD_TYPE=" .. (package:is_debug() and "Debug" or "Release"))
         table.insert(configs, "-DBUILD_SHARED_LIBS=" .. (package:config("shared") and "ON" or "OFF"))
-        import("package.tools.cmake").install(package, configs)
+        import("package.tools.cmake").install(package, configs, {cxflags = cxflags})
     end)
 
     on_test(function (package)

@@ -34,3 +34,9 @@ jobs:
           export LIBRARY_PATH="$LIBRARY_PATH:/opt/homebrew/lib/gcc/14/"
           export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/homebrew/lib/gcc/14/"
           xmake l ./scripts/test.lua -vD -a ${{ matrix.arch }} -k ${{ matrix.kind }}
+
+      - name: Setup tmate session
+        if: failure()
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
