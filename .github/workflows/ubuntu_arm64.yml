@@ -30,21 +30,8 @@ jobs:
         run: |
           # TODO we will remove it later
           sudo apt-get update
-          sudo apt-get install -y libgl1-mesa-dev libglu1-mesa-dev p7zip gobjc gcc g++
+          sudo apt-get install -y libgl1-mesa-dev libglu1-mesa-dev p7zip gobjc gcc g++ lld
 
       - name: Tests
         run: |
           xmake l ./scripts/test.lua -vD -k ${{ matrix.kind }} -m ${{ matrix.mode }}
-
-      - name: Compress xmake home # To avoid "invalid characters include" problem...
-        if: failure()
-        run: |
-          tar -czf xmake-home.tar.gz ~/.xmake
-
-      - name: Upload xmake home
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: xmake-home-${{ matrix.os }}-${{ matrix.kind }}-${{ matrix.mode }}
-          retention-days: 1
-          path: xmake-home.tar.gz

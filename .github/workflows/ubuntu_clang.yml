@@ -41,23 +41,3 @@ jobs:
       - name: Tests
         run: |
           xmake l ./scripts/test.lua -vD --toolchain=clang-20 -k ${{ matrix.kind }}
-
-      - name: Compress xmake home # To avoid "invalid characters include" problem...
-        if: failure()
-        run: |
-          tar -czf xmake-home.tar.gz ~/.xmake
-
-      - name: Upload xmake home
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: xmake-home-${{ matrix.os }}-${{ matrix.kind }}
-          retention-days: 1
-          path: xmake-home.tar.gz
-
-#      - name: Setup upterm session
-#        if: failure()
-#        uses: Redbeanw44602/action-upterm@main
-#        with:
-#          limit-access-to-actor: true
-#          wait-timeout-minutes: 5
