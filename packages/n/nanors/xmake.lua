@@ -7,7 +7,7 @@ package("nanors")
     add_versions("2026.7.5", "c3529fda520f53cd007328ba30b6ad3f89947722")
 
     on_check(function (package)
-        if package:is_arch("arm.*") and package:check_sizeof("void*") != "8" then
+        if package:is_arch("arm.*") and package:check_sizeof("void*") ~= "8" then
             raise("package(nanors): unsupported arch!")
         end
     end)
