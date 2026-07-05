@@ -1,18 +1,17 @@
 package("mdns_cpp")
-    set_kind("library")
     set_homepage("https://github.com/gocarlos/mdns_cpp")
     set_description("A simple mDNS service with C++ interface.")
     set_license("MIT")
 
     add_urls("https://github.com/gocarlos/mdns_cpp.git")
-    add_versions("v2022.9.7", "05b181ca2b3920b787287a291fae326ecd0ef019")
+    add_versions("2022.9.7", "05b181ca2b3920b787287a291fae326ecd0ef019")
 
     add_deps("cmake")
 
     -- add_deps("mdns") -- we cannot unbundle mdns currently because mdns_cpp is designed for mdns <= 1.3.
 
     if is_plat("windows", "mingw") then
-        add_syslinks("iphlpapi", "ws2_3")
+        add_syslinks("iphlpapi", "ws2_32")
     end
     if is_plat("linux", "bsd") then
         add_syslinks("pthread")
@@ -24,7 +23,7 @@ package("mdns_cpp")
         assert(ndk_sdkver and tonumber(ndk_sdkver) >= 24, "package(mdns_cpp): need ndk api level >= 24")
     end)
 
-    on_install(function (package)
+    on_install("!wasm", function (package)
         -- os.rm("src/mdns.h")
         -- io.replace("CMakeLists.txt", "src/mdns.h", "", {plain = true})
 
