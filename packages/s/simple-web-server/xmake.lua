@@ -34,10 +34,7 @@ package("simple-web-server")
         io.replace("CMakeLists.txt", [[if(CMAKE_SOURCE_DIR STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")]], "if(FALSE)", {plain = true})
         io.replace("CMakeLists.txt", "install(", "endif()\nif(TRUE)\ninstall(", {plain = true})
 
-        local configs = {}
-        table.insert(configs, "-DCMAKE_BUILD_TYPE=" .. (package:debug() and "Debug" or "Release"))
-        table.insert(configs, "-DBUILD_SHARED_LIBS=" .. (package:config("shared") and "ON" or "OFF"))
-        import("package.tools.cmake").install(package, configs)
+        import("package.tools.cmake").install(package)
     end)
 
     on_test(function (package)
