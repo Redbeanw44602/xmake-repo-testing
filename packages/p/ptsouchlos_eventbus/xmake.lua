@@ -16,5 +16,5 @@ package("ptsouchlos_eventbus")
     end)
 
     on_test(function (package)
-        assert(package:has_cxxtypes("dp::event_bus<>", {includes = "eventbus/event_bus.hpp"}))
+        assert(package:has_cxxtypes("dp::event_bus<>", {includes = "eventbus/event_bus.hpp", configs = {languages = "c++17"}}))
     end)
