@@ -6,6 +6,10 @@ package("mdns_cpp")
     add_urls("https://github.com/gocarlos/mdns_cpp.git")
     add_versions("2022.9.7", "05b181ca2b3920b787287a291fae326ecd0ef019")
 
+    if is_plat("windows") then
+        add_configs("shared", {description = "Build shared library.", default = false, type = "boolean", readonly = true})
+    end
+
     add_deps("cmake")
 
     -- add_deps("mdns") -- we cannot unbundle mdns currently because mdns_cpp is designed for mdns <= 1.3.
@@ -33,7 +37,7 @@ package("mdns_cpp")
         end
         if package:is_plat("bsd") then
             -- To fix incomplete type sockaddr error.
-            io.insert("src/utils.cpp", 0, [[#include <sys/socket.h>]])
+            io.insert("src/utils.cpp", 0, "#include <sys/socket.h>\n#include <netinet/in.h>")
         end
 
         local configs = {
