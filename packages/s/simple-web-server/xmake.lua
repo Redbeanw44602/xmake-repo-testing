@@ -5,7 +5,7 @@ package("simple-web-server")
     set_license("MIT")
 
     add_urls("https://gitlab.com/eidheim/Simple-Web-Server.git")
-    add_versions("v2025.9.13", "546895a93a29062bb178367b46c7afb72da9881e")
+    add_versions("2025.9.13", "546895a93a29062bb178367b46c7afb72da9881e")
 
     add_configs("standalone_asio", {description = "Use standalone Asio instead of Boost.Asio", default = false, type = "boolean"})
     add_configs("openssl", {description = "Use openssl for HTTPS support", default = true, type = "boolean"})
