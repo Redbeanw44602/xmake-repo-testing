@@ -26,6 +26,17 @@ package("mdns_cpp")
     on_install("!wasm", function (package)
         -- os.rm("src/mdns.h")
         -- io.replace("CMakeLists.txt", "src/mdns.h", "", {plain = true})
+        if package:is_plat("windows") then
+            io.replace("CMakeLists.txt", "target_link_libraries(${PROJECT_NAME} INTERFACE iphlpapi ws2_32)", "target_link_libraries(${PROJECT_NAME} PUBLIC iphlpapi ws2_32)")
+        end
+        if package:is_plat("mingw") then
+            -- @see https://github.com/gocarlos/mdns_cpp/issues/8
+            io.replace("src/mdns.cpp", "sock_addr.sin_addr = in4addr_any;", "sock_addr.sin_addr.s_addr = INADDR_ANY;", {plain = true})
+        end
+        if package:is_plat("bsd") then
+            -- To fix incomplete type sockaddr error.
+            io.insert("src/utils.cpp", 0, [[#include "mdns.h"]])
+        end
 
         local configs = {
             "-DMDNS_CPP_BUILD_EXAMPLE=OFF"
