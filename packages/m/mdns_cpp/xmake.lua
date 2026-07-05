@@ -37,7 +37,7 @@ package("mdns_cpp")
         end
         if package:is_plat("bsd") then
             -- To fix incomplete type sockaddr error.
-            io.insert("src/utils.cpp", 0, "#include <sys/socket.h>\n#include <netinet/in.h>")
+            io.insert("src/utils.cpp", 0, [[#include "mdns.h"]])
         end
 
         local configs = {
