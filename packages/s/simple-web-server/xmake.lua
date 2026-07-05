@@ -30,7 +30,7 @@ package("simple-web-server")
         end
     end)
 
-    on_install(function (package)
+    on_install("!wasm", function (package)
         io.replace("CMakeLists.txt", [[if(CMAKE_SOURCE_DIR STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")]], "if(FALSE)", {plain = true})
         io.replace("CMakeLists.txt", "install(", "endif()\nif(TRUE)\ninstall(", {plain = true})
 
