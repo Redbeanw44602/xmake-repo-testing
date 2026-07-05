@@ -1,0 +1,45 @@
+package("simple-web-server")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://gitlab.com/eidheim/Simple-Web-Server")
+    set_description("A very simple, fast, multithreaded, platform independent HTTP and HTTPS server and client library.")
+    set_license('MIT')
+
+    add_urls("https://gitlab.com/eidheim/Simple-Web-Server.git")
+    add_versions("v2025.9.13", "546895a93a29062bb178367b46c7afb72da9881e")
+
+    add_configs("standalone_asio", {description = "Use standalone Asio instead of Boost.Asio", default = false, type = "boolean"})
+    add_configs("openssl", {description = "Use openssl for HTTPS support", default = true, type = "boolean"})
+
+    add_deps("cmake")
+
+    on_load(function (package)
+        if package:config("openssl") then
+            package:add("deps", "openssl3")
+        end
+        if package:config("standalone_asio") then
+            package:add("deps", "asio")
+        else
+            package:add("deps", "boost", {configs = {filesystem = false, asio = true, system = true}})
+        end
+    end)
+
+    on_install("linux", "cross", "android", "iphoneos", function (package)
+        io.replace("CMakeLists.txt", [[if(CMAKE_SOURCE_DIR STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")]], "if(FALSE)", {plain = true})
+        io.replace("CMakeLists.txt", "install(", "endif()\nif(TRUE)\ninstall(", {plain = true})
+
+        local configs = {
+            "-DBUILD_TESTING=OFF"
+        }
+        table.insert(configs, "-DCMAKE_BUILD_TYPE=" .. (package:debug() and "Debug" or "Release"))
+        table.insert(configs, "-DBUILD_SHARED_LIBS=" .. (package:config("shared") and "ON" or "OFF"))
+        import("package.tools.cmake").install(package, configs)
+    end)
+
+    on_test(function (package)
+        assert(package:check_cxxsnippets({test = [[
+            #include <simple-web-server/server_http.hpp>
+            void test() {
+                SimpleWeb::Server<SimpleWeb::HTTP> server;
+            }
+        ]]}, {configs = {languages = "c++11"}}))
+    end)
