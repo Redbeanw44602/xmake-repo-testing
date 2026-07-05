@@ -11,6 +11,9 @@ package("mdns_cpp")
 
     -- add_deps("mdns") -- we cannot unbundle mdns currently because mdns_cpp is designed for mdns <= 1.3.
 
+    if is_plat("windows", "mingw") then
+        add_syslinks("iphlpapi", "ws2_3")
+    end
     if is_plat("linux", "bsd") then
         add_syslinks("pthread")
     end
