@@ -36,8 +36,10 @@ package("mdns_cpp")
             io.replace("src/mdns.cpp", "sock_addr.sin_addr = in4addr_any;", "sock_addr.sin_addr.s_addr = INADDR_ANY;", {plain = true})
         end
         if package:is_plat("bsd") then
+            print('IS BSD')
             -- To fix incomplete type sockaddr error.
-            io.insert("src/utils.cpp", 0, [[#include "mdns.h"]])
+            io.insert("src/utils.cpp", 0, "#include <sys/socket.h>")
+            print(io.readfile('src/utils.cpp'))
         end
 
         local configs = {
