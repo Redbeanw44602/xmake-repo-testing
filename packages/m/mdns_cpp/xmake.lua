@@ -38,7 +38,7 @@ package("mdns_cpp")
         if package:is_plat("bsd") then
             print('IS BSD')
             -- To fix incomplete type sockaddr error.
-            io.insert("src/utils.cpp", 0, "#include <sys/socket.h>")
+            io.insert("src/utils.cpp", 1, "#include <sys/socket.h>")
             print(io.readfile('src/utils.cpp'))
         end
 
