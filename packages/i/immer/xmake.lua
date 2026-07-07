@@ -15,6 +15,8 @@ package("immer")
     add_deps("cmake")
 
     on_install(function (package)
+        io.replace("cmake/FindBoehmGC.cmake", "include(${CMAKE_ROOT}/Modules/CheckCSourceRuns.cmake)", "include(CheckCSourceRuns)", {plain = true})
+
         local configs = {
             "-Dimmer_BUILD_TESTS=OFF",
             "-Dimmer_BUILD_EXAMPLES=OFF",
