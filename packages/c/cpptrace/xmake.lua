@@ -48,7 +48,7 @@ package("cpptrace")
         end
     end)
 
-    on_install("linux", "macosx", "windows", "mingw", "cross", function (package)
+    on_install(function (package)
         if not package:config("shared") then
             package:add("defines", "CPPTRACE_STATIC_DEFINE")
         end
