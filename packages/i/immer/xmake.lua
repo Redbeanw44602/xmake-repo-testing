@@ -9,14 +9,15 @@ package("immer")
              "https://github.com/arximboldi/immer.git")
     add_versions("v0.9.1", "b18b92ba60ec3186dc36ef671d3c2ae542cbb63eb6dc0e258476c6111a67c971")
     add_versions("v0.9.0", "4e9f9a9018ac6c12f5fa92540feeedffb0a0a7db0de98c07ee62688cc329085a")
-    add_versions("v0.8.0", "4ed9e86a525f293e0ba053107b937d88b032674ec6e5db958816f2e412677fde")
     add_versions("v0.8.1", "de8411c84830864604bb685dc8f2e3c0dbdc40b95b2f6726092f7dcc85e75209")
+    add_versions("v0.8.0", "4ed9e86a525f293e0ba053107b937d88b032674ec6e5db958816f2e412677fde")
 
     add_deps("cmake")
 
     on_install(function (package)
         -- @see https://github.com/arximboldi/immer/pull/315
         io.replace("cmake/FindBoehmGC.cmake", "include(${CMAKE_ROOT}/Modules/CheckCSourceCompiles.cmake)", "include(CheckCSourceRuns)", {plain = true})
+        io.replace("cmake/FindBoehmGC.cmake", "INCLUDE(${CMAKE_ROOT}/Modules/CheckCSourceCompiles.cmake)", "INCLUDE(CheckCSourceRuns)", {plain = true})
 
         local configs = {
             "-Dimmer_BUILD_TESTS=OFF",
