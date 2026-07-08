@@ -17,17 +17,6 @@ package("cpptrace")
     add_versions("v0.7.4", "1241790cace5d59ddf21ce5d046f71cd26448a3c8c15d123157498ba81e3543d")
     add_versions("v0.7.3", "8b83200860db148a7fd0b2594e7affc6a55809da256e132d6f0d5b202b2e26dd")
     add_versions("v0.7.1", "63df54339feb0c68542232229777df057e1848fc8294528613971bbf42889e83")
-    add_versions("v0.7.0", "b5c1fbd162f32b8995d9b1fefb1b57fac8b1a0e790f897b81cdafe3625d12001")
-    add_versions("v0.6.3", "665bf76645ec7b9e6d785a934616f0138862c36cdb58b0d1c9dd18dd4c57395a")
-    add_versions("v0.6.2", "02a0540b5b1be0788565f48b065b456d3eab81ae2323a50e75ed36449a0143ed")
-    add_versions("v0.6.1", "4bb478eedbe4b2c0093ef7af4f64795304850e03312e658076b25ef8d6019c75")
-    add_versions("v0.6.0", "7c2996f03d15f61016bc81fe7fa5220b1cc42498333c5c0e699ad2f96b918b96")
-    add_versions("v0.5.4", "bab0f76330f90c445216ccade1a3ff29c9c4bbd44805be34d52095cd95b02df4")
-    add_versions("v0.5.2", "d148998e175b9c69ffb4383ab321a0d27487392e4eee3f39441d35b6856c8f78")
-    add_versions("v0.5.1", "27b9f862ec6185f570ee59c07fdd12bebb55a986191518e896621317d2654f26")
-    add_versions("v0.4.0", "eef368f5bed2d85c976ea90b325e4c9bfc1b9618cbbfa15bf088adc8fa98ff89")
-
-    add_patches("0.5.2", "https://github.com/jeremy-rifkin/cpptrace/commit/599d6abd6cc74e80e8429fc309247be5f7edd5d7.patch", "abdfbc212f0005643443dc2592347e370c6b5d75e5aaedee71693eb3aad04d69")
 
     add_configs("libunwind", {description = "Enable libunwind for stack unwinding", default = false, type = "boolean"})
 
@@ -48,7 +37,7 @@ package("cpptrace")
         end
     end)
 
-    on_install(function (package)
+    on_install("!wasm and !bsd", function (package)
         if not package:config("shared") then
             package:add("defines", "CPPTRACE_STATIC_DEFINE")
         end
@@ -68,24 +57,13 @@ package("cpptrace")
     end)
 
     on_test(function (package)
-        local code
-        if package:gitref() or package:version():gt("0.1") then
-            code = [[
-                void test() {
-                    cpptrace::generate_trace().print();
-                }
-            ]]
-        else
-            code = [[
-                void test() {
-                    cpptrace::print_trace();
-                }
-            ]]
-        end
-
         local languages = "c++11"
         if package:is_plat("windows") and package:has_tool("cxx", "clang", "clangxx") then
             languages = "c++14"
         end
-        assert(package:check_cxxsnippets({test = code}, {configs = {languages = languages}, includes = {"cpptrace/cpptrace.hpp"}}))
+        assert(package:check_cxxsnippets({test = [[
+            void test() {
+                cpptrace::generate_trace().print();
+            }
+        ]]}, {configs = {languages = languages}, includes = {"cpptrace/cpptrace.hpp"}}))
     end)
