@@ -31,6 +31,12 @@ package("cpptrace")
         add_deps("libdwarf")
     end
 
+    on_check(function (package)
+        if package:is_arch("arm.*") and package:check_sizeof("void*") ~= "8" then
+            raise("package(cpptrace): unsupported arch!")
+        end
+    end)
+
     on_load(function (package)
         if package:config("libunwind") then
             package:add("deps", "libunwind")
