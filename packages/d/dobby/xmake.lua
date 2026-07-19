@@ -8,7 +8,7 @@ package("dobby")
     add_versions("2023.4.14", "0932d69c320e786672361ab53825ba8f4245e9d3")
     
     add_patches("2023.4.14", "patches/fix-compile-on-lower-version-of-gcc.patch", "632aad7d79e2afd9587089a39c3eb2b64a3750ab3c8954f04672c13abcddbbae")
-    add_patches("2023.4.14", "patches/fix-near-memory-allocator.patch", "a920f0421a3f46efa59aada4f6297f8af09192eb289e76bfa04f95a5bfd212d2")
+    add_patches("2023.4.14", "patches/fix-near-memory-allocator.patch", "12ba4bf307a2671b034a50f8c2a8b45f28acd6e0c177dafe6a3ed239d91d1a8b")
 
     add_configs("symbol_resolver", {description = "Enable symbol resolver plugin.", default = true,  type = "boolean"})
     add_configs("import_table_replacer", {description = "Enable import table replacer plugin.", default = false, type = "boolean", readonly = not is_plat("macosx", "iphoneos")})
